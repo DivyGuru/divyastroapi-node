@@ -1,0 +1,78 @@
+{
+  "name": "divyastroapi",
+  "version": "0.1.0",
+  "description": "Official Node.js / TypeScript SDK for DivyAstroAPI — Vedic & Western astrology, panchang, matchmaking, dashas, numerology and tarot. DrikPanchang-level precision, pay-per-call.",
+  "keywords": [
+    "astrology",
+    "vedic",
+    "panchang",
+    "kundli",
+    "horoscope",
+    "jyotish",
+    "western-astrology",
+    "matchmaking",
+    "numerology",
+    "pdf",
+    "white-label",
+    "kundli-pdf",
+    "divyastroapi"
+  ],
+  "license": "MIT",
+  "author": "DivyGuru <divyguru108@gmail.com>",
+  "homepage": "https://divyastroapi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DivyGuru/divyastroapi-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DivyGuru/divyastroapi-node/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./pdf": {
+      "types": "./dist/pdf/index.d.ts",
+      "import": "./dist/pdf/index.js",
+      "require": "./dist/pdf/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "peerDependencies": {
+    "puppeteer": ">=21"
+  },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": true
+    }
+  }
+}

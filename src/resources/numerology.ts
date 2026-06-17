@@ -11,27 +11,27 @@ export class Numerology {
 
   /** Compute the advanced Vedic numerology profile from a name (and optionally DOB): Maturity Number (life purpose emerging after 40), Karmic Lessons (missing digits = undeveloped qualities), Sub-conscious Self (9 minus karmic lessons), Hidden Passion (dominant talent), and Balance Number (crisis response quality). */
   advanced<T = unknown>(input: { name: string; dob?: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/advanced", q.applyExtras(q.qNone(input), input, [["name", "name"], ["dob", "dob"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/advanced", q.applyExtras(q.qNone(input), input, [["name", "name"], ["dob", "dob"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the four Vedic Challenge Numbers from a birth date — the life obstacles and developmental lessons to be mastered in different life stages (CH1 early life, CH2 middle life, CH3 major challenge, CH4 later life). */
   challenges<T = unknown>(input: { dob: string; refDate?: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/challenges", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["refDate", "ref_date"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/challenges", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["refDate", "ref_date"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the Bhagyank / Conductor number — derived from the full date of birth (DD+MM+YYYY reduced to a single digit). */
   conductor<T = unknown>(input: { dob: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/conductor", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/conductor", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the Destiny number — derived from all letters of the full name (vowels + consonants). */
   destiny<T = unknown>(input: { name: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/destiny", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/destiny", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the Mulank / Driver number — the single-digit number derived from the day of birth (1–31, reduced to 1–9, preserving 11/22/33). */
   driver<T = unknown>(input: { dob: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/driver", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/driver", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Full numerology report (driver, conductor, soul, personality, destiny). */
@@ -41,16 +41,16 @@ export class Numerology {
 
   /** Compute the Personality number — derived from the consonants of the full name. */
   personality<T = unknown>(input: { name: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/personality", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/personality", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the Personal Year, Personal Month, and Personal Day numbers for any date — the time-transiting layer of Vedic numerology that shows the numerological climate for a specific period. */
   personalPeriods<T = unknown>(input: { dob: string; refDate?: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/personal-periods", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["refDate", "ref_date"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/personal-periods", q.applyExtras(q.qNone(input), input, [["dob", "dob"], ["refDate", "ref_date"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Compute the Soul Urge number — derived from the vowels of the full name. */
   soul<T = unknown>(input: { name: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/numerology/soul", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/numerology/soul", q.applyExtras(q.qNone(input), input, [["name", "name"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 }

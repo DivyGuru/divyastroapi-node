@@ -71,7 +71,8 @@ export function resolveBranding(raw?: RawBranding, override?: Branding): Resolve
 // so HTML-escaping is the wrong (and insufficient) tool — a value like
 // `red}body{display:none` would inject CSS. Validate against the safe color
 // grammar and fall back to the default on any mismatch.
-const SAFE_COLOR = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+|(?:rgb|rgba|hsl|hsla)\([0-9.,%/\s]+\))$/;
+const SAFE_COLOR =
+  /^(#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|[a-zA-Z]+|(?:rgb|rgba|hsl|hsla)\([0-9.,%/\s]+\))$/;
 
 function safeColor(value: string, fallback: string): string {
   const v = value.trim();

@@ -3,8 +3,11 @@ import {
   DivyAstro,
   AuthenticationError,
   PaymentRequiredError,
+  PermissionError,
+  NotFoundError,
   RateLimitError,
   BadRequestError,
+  ServerError,
   DivyAstroConnectionError,
   type FetchLike,
 } from "../src/index.js";
@@ -215,6 +218,23 @@ describe("retries", () => {
     await expect(makeClient(fetch, { maxRetries: 2 }).chart.planets(BIRTH)).rejects.toMatchObject({ status: 503 });
     expect(calls.length).toBe(3); // initial + 2 retries
   });
+
+  it("clamps a negative maxRetries to 0 (still makes the request once)", async () => {
+    const { fetch, calls } = mockFetch(() => ({ status: 503, body: { error: { code: "unavailable" } }, headers: { "retry-after": "0" } }));
+    await expect(makeClient(fetch, { maxRetries: -5 }).chart.planets(BIRTH)).rejects.toMatchObject({ status: 503 });
+    expect(calls.length).toBe(1); // negative clamped to 0 → one attempt, not zero
+  });
+});
+
+describe("localization", () => {
+  it("sends both lang and locale for narrative endpoints", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch).narrative.lagna({ ...BIRTH, lang: "hi" });
+    const url = new URL(calls[0]!.url);
+    // Server is inconsistent (narrative reads `locale`); the SDK emits both.
+    expect(url.searchParams.get("lang")).toBe("hi");
+    expect(url.searchParams.get("locale")).toBe("hi");
+  });
 });
 
 describe("configuration", () => {
@@ -239,10 +259,150 @@ describe("configuration", () => {
     expect(client).toBeInstanceOf(DivyAstro);
   });
 
+  it("works with no constructor argument when DIVYASTRO_API_KEY is set", () => {
+    process.env.DIVYASTRO_API_KEY = "dv_live_env";
+    expect(() => new DivyAstro()).not.toThrow();
+  });
+
+  it("throws a clean error (not a TypeError) with no argument and no env key", () => {
+    // Regression: new DivyAstro() must not crash with "cannot read apiKey of undefined".
+    expect(() => new DivyAstro()).toThrow(/API key/);
+  });
+
   it("surfaces network failures as DivyAstroConnectionError", async () => {
     const fetch: FetchLike = async () => { throw new Error("boom"); };
     await expect(makeClient(fetch).panchang.tithi({ lat: 1, lon: 2, tz: "UTC" })).rejects.toBeInstanceOf(
       DivyAstroConnectionError,
     );
+  });
+});
+
+describe("error status mapping", () => {
+  const cases: Array<[number, string]> = [
+    [403, "PermissionError"],
+    [404, "NotFoundError"],
+    [500, "ServerError"],
+    [503, "ServerError"],
+  ];
+  for (const [status, name] of cases) {
+    it(`maps ${status} to ${name}`, async () => {
+      const { fetch } = mockFetch(() => ({ status, body: { error: { code: "x", message: "m" } } }));
+      const err = await makeClient(fetch, { maxRetries: 0 }).chart.planets(BIRTH).catch((e) => e);
+      expect(err.name).toBe(name);
+      expect(err.status).toBe(status);
+    });
+  }
+
+  it("403/404 stay instanceof their class and the base DivyAstroError", async () => {
+    const { fetch } = mockFetch(() => ({ status: 403, body: { error: { code: "forbidden" } } }));
+    const err = await makeClient(fetch, { maxRetries: 0 }).chart.planets(BIRTH).catch((e) => e);
+    expect(err).toBeInstanceOf(PermissionError);
+  });
+
+  it("does not retry a non-retryable 4xx (single call)", async () => {
+    const { fetch, calls } = mockFetch(() => ({ status: 400, body: { error: { code: "invalid_param" } } }));
+    await expect(makeClient(fetch, { maxRetries: 3 }).chart.planets(BIRTH)).rejects.toBeInstanceOf(BadRequestError);
+    expect(calls.length).toBe(1);
+  });
+
+  it("retries a network error, then succeeds", async () => {
+    let n = 0;
+    const fetch: FetchLike = async () => {
+      n += 1;
+      if (n === 1) throw new Error("ECONNRESET");
+      return new Response(JSON.stringify({ data: { ok: true } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    };
+    const res = await makeClient(fetch, { maxRetries: 2 }).chart.planets(BIRTH);
+    expect(res).toEqual({ ok: true });
+    expect(n).toBe(2);
+  });
+});
+
+describe("query encoding edge cases", () => {
+  it("keeps a legitimate zero (lat=0, lon=0)", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch).panchang.tithi({ lat: 0, lon: 0, tz: "UTC" });
+    const url = new URL(calls[0]!.url);
+    expect(url.searchParams.get("lat")).toBe("0");
+    expect(url.searchParams.get("lon")).toBe("0");
+  });
+
+  it("sends useTrueNode=false explicitly when set", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch).chart.planets({ ...BIRTH, useTrueNode: false });
+    expect(new URL(calls[0]!.url).searchParams.get("use_true_node")).toBe("false");
+  });
+
+  it("URL-encodes a fixed-offset tz (+05:30)", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch).panchang.tithi({ lat: 1, lon: 2, tz: "+05:30" });
+    expect(calls[0]!.url).toContain("tz=%2B05%3A30"); // '+' encoded, not sent as space
+    expect(new URL(calls[0]!.url).searchParams.get("tz")).toBe("+05:30");
+  });
+
+  it("percent-encodes path parameters", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch).chart.planet({ ...BIRTH, name: "a b/c" });
+    expect(new URL(calls[0]!.url).pathname).toBe("/v1/chart/planet/a%20b%2Fc");
+  });
+
+  it("includes default headers and a User-Agent on Node", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
+    await makeClient(fetch, { defaultHeaders: { "X-Trace": "abc" } }).panchang.tithi({ lat: 1, lon: 2, tz: "UTC" });
+    const h = calls[0]!.init!.headers as Record<string, string>;
+    expect(h["X-Trace"]).toBe("abc");
+    expect(h["User-Agent"]).toMatch(/divyastroapi-node/);
+  });
+});
+
+describe("abort & timeout", () => {
+  // Never resolves on its own; rejects with an AbortError when its signal aborts.
+  const signalFetch: FetchLike = (_url, init) =>
+    new Promise((_resolve, reject) => {
+      const sig = init?.signal;
+      const fail = () => {
+        const e = new Error("aborted");
+        e.name = "AbortError";
+        reject(e);
+      };
+      if (sig?.aborted) return fail();
+      sig?.addEventListener("abort", fail, { once: true });
+    });
+
+  it("rejects a pre-aborted caller signal with code 'aborted'", async () => {
+    const ac = new AbortController();
+    ac.abort();
+    const err = await makeClient(signalFetch)
+      .panchang.tithi({ lat: 1, lon: 2, tz: "UTC" }, { signal: ac.signal })
+      .catch((e) => e);
+    expect(err).toBeInstanceOf(DivyAstroConnectionError);
+    expect(err.code).toBe("aborted");
+  });
+
+  it("times out with code 'timeout'", async () => {
+    const err = await makeClient(signalFetch, { maxRetries: 0 })
+      .panchang.tithi({ lat: 1, lon: 2, tz: "UTC" }, { timeoutMs: 10 })
+      .catch((e) => e);
+    expect(err).toBeInstanceOf(DivyAstroConnectionError);
+    expect(err.code).toBe("timeout");
+  });
+});
+
+describe("escape hatch", () => {
+  it("client.request hits an arbitrary path and unwraps data", async () => {
+    const { fetch, calls } = mockFetch(() => ({ body: { data: { v: 1 } } }));
+    const res = await makeClient(fetch).request("/v1/anything", { a: "b" });
+    expect(res).toEqual({ v: 1 });
+    const url = new URL(calls[0]!.url);
+    expect(url.pathname).toBe("/v1/anything");
+    expect(url.searchParams.get("a")).toBe("b");
+  });
+
+  it("client.get is an alias for request", async () => {
+    const { fetch } = mockFetch(() => ({ body: { data: { ok: 1 } } }));
+    expect(await makeClient(fetch).get("/v1/x")).toEqual({ ok: 1 });
   });
 });

@@ -8,7 +8,7 @@ pay-per-call billing.
   matchmaking, transits, horoscopes, numerology, tarot, muhurta, reports, narratives,
   and a complete Western (tropical) module.
 - ✅ **Zero runtime dependencies** — uses the platform `fetch` (Node 18+, Bun, Deno,
-  edge runtimes, browsers).
+  and edge / serverless runtimes). Server-side by design — see [Authentication](#authentication).
 - ✅ **ESM + CommonJS** with bundled `.d.ts` types.
 - ✅ Typed errors, automatic retries (429/5xx) with `Retry-After`, timeouts, and a
   generic escape hatch for any endpoint.
@@ -55,6 +55,30 @@ const match = await client.milan.ashtakootaTotal({
 ```
 
 > CommonJS works too: `const { DivyAstro } = require("divyastroapi");`
+
+## Authentication
+
+Your API key (`dv_live_…`) authenticates every request and is sent as a
+`Authorization: Bearer …` header. Provide it in any of three ways:
+
+```ts
+new DivyAstro({ apiKey: "dv_live_..." });   // 1. explicit (recommended)
+new DivyAstro("dv_live_...");                // 2. shorthand
+new DivyAstro();                             // 3. reads process.env.DIVYASTRO_API_KEY
+```
+
+If no key is found (neither argument nor env var), the constructor throws a clear
+error. Get a key at **https://divyastroapi.com/dashboard/keys**.
+
+> ### 🔒 Keep your key secret — use the SDK server-side
+> A `dv_live_…` key carries your account's **full billing access**. Use this SDK from a
+> **server, serverless function, or edge runtime** — and load the key from an environment
+> variable / secrets manager, never hard-coded. **Do not embed the key in browser, mobile,
+> desktop, or any client-side code**, where end users could extract it and run up your bill.
+> For client apps, call DivyAstroAPI from your own backend and forward the results.
+>
+> (Need PDFs in the browser? The dependency-free `divyastroapi/pdf` `render*Html`
+> functions take **no key** and are safe to run anywhere — see [Branded PDF reports](#branded-pdf-reports).)
 
 ## Configuration
 

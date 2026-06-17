@@ -11,7 +11,7 @@ export class Reports {
 
   /** Generate a comprehensive Dasha Analysis report — the full Vimshottari dasha timeline with narrative interpretation for each Mahadasha period, key life events timing, and dasha-transit correlations. */
   dashaAnalysis<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/dasha-analysis", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/dasha-analysis", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a detailed daily horoscope report for a Moon sign — structured report with separate sections for career, love, finance, health, and daily guidance. */
@@ -31,41 +31,41 @@ export class Reports {
 
   /** Generate the Brihad (comprehensive) Kundli report — the most detailed birth chart report covering chart analysis, all divisional charts (D1–D60), planetary strengths (Shadbala), ashtakavarga, all dashas, yogas, doshas, remedies, and lifetime predictions. */
   kundliBrihad<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/kundli/brihad", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/kundli/brihad", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a Detailed Kundli report — comprehensive birth chart report with D1/D9/D10 charts, planetary strengths, major yogas, doshas, Vimshottari dasha timeline, and predictions by life area. */
   kundliDetailed<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/kundli/detailed", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/kundli/detailed", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a Lite Kundli report — a concise birth chart summary with lagna, Moon sign, nakshatra, key planets, current dasha, and a brief personality reading. */
   kundliLite<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/kundli/lite", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/kundli/lite", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a comprehensive Mangal Dosha report — full analysis of Mangal Dosha presence, sub-rules, all cancellation conditions checked, severity, impact on marriage, and detailed remedies with specific mantras, pujas, and gemstone guidance. */
   mangalDosha<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/mangal-dosha", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/mangal-dosha", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a comprehensive Match Making (Kundli Milan) report for a couple — full Ashtakoota analysis with all 8 kootas scored, Mangal Dosha compatibility, Dasha synchrony, Navamsa compatibility, and an overall written recommendation. */
   matchMaking<T = unknown>(input: Types.BoyGirlInput & Types.VedicMomentSettings & { lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/match-making", q.applyExtras(q.qBoyGirl(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/reports/match-making", q.applyExtras(q.qBoyGirl(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Generate a comprehensive Numerology report — calculates all key numbers (Driver/Mulank, Conductor/Bhagyank, Name number, Soul Urge, Personality, Destiny) from name and date of birth, with complete interpretation of each number's meaning and their combined influence. */
   numerology<T = unknown>(input: { name: string; dob: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/numerology", q.applyExtras(q.qNone(input), input, [["name", "name"], ["dob", "dob"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/reports/numerology", q.applyExtras(q.qNone(input), input, [["name", "name"], ["dob", "dob"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Generate a comprehensive Sade Sati report — covers current Sade Sati status, all past and upcoming cycles from birth to age 90, phase-by-phase narrative for the current or next cycle, and detailed remedies (mantras, donations, Shani puja guidance). */
   sadeSati<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/sade-sati", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/sade-sati", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 
   /** Generate a comprehensive Varshaphal (Solar Return) annual report — full annual chart with varsha lord, muntha, annual lagna, Tajika yogas, Mudda dasha timeline, and predictions for all 12 life areas for the current solar-return year. */
   varshaphal<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string; format?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/reports/varshaphal", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["format", "format"]]), opts);
+    return this._c.request<T>("/v1/reports/varshaphal", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"], ["format", "format"]]), opts);
   }
 }

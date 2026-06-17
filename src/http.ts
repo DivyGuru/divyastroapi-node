@@ -57,15 +57,18 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
       reject(new DivyAstroConnectionError("Request aborted", { code: "aborted" }));
       return;
     }
-    const t = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(t);
-        reject(new DivyAstroConnectionError("Request aborted", { code: "aborted" }));
-      },
-      { once: true },
-    );
+    // Remove the abort listener on BOTH paths — `{ once: true }` only auto-removes
+    // after the listener fires, so a normally-completing sleep would otherwise leak
+    // a listener on a long-lived caller signal (MaxListenersExceededWarning).
+    const onAbort = () => {
+      clearTimeout(t);
+      reject(new DivyAstroConnectionError("Request aborted", { code: "aborted" }));
+    };
+    const t = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 

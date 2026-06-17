@@ -145,7 +145,15 @@ function buildMethod(e) {
   // Query expression.
   let qExpr = `q.${shapeCfg.builder}(input)`;
   if (extras.length) {
-    const map = extras.map((x) => `[${JSON.stringify(x.name ?? camel(x.wire))}, ${JSON.stringify(x.wire)}]`);
+    const map = [];
+    for (const x of extras) {
+      const field = x.name ?? camel(x.wire);
+      map.push(`[${JSON.stringify(field)}, ${JSON.stringify(x.wire)}]`);
+      // The server's localization param is inconsistent: vedic-narrative and
+      // report endpoints read `locale`, while horoscope/numerology/western read
+      // `lang`. Emit BOTH from the same input so the language option always works.
+      if (x.wire === "lang") map.push(`[${JSON.stringify(field)}, "locale"]`);
+    }
     qExpr = `q.applyExtras(${qExpr}, input, [${map.join(", ")}])`;
   }
 

@@ -13,7 +13,7 @@ import type { QueryParams } from "./types.js";
 import { Resources } from "./resources/index.js";
 
 /** SDK version, surfaced in the User-Agent header. */
-export const VERSION = "0.1.0";
+export const VERSION = "0.1.1";
 
 const DEFAULT_BASE_URL = "https://api.divyastroapi.com";
 
@@ -41,7 +41,7 @@ export interface ClientCore {
 }
 
 function resolveConfig(options: DivyAstroOptions | string): ResolvedConfig {
-  const opts: DivyAstroOptions = typeof options === "string" ? { apiKey: options } : options;
+  const opts: DivyAstroOptions = typeof options === "string" ? { apiKey: options } : (options ?? {});
   const envKey =
     typeof process !== "undefined" ? process.env?.DIVYASTRO_API_KEY : undefined;
   const apiKey = opts.apiKey ?? envKey;
@@ -63,7 +63,7 @@ function resolveConfig(options: DivyAstroOptions | string): ResolvedConfig {
     apiKey,
     baseUrl: (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ""),
     timeoutMs: opts.timeoutMs ?? 30_000,
-    maxRetries: opts.maxRetries ?? 2,
+    maxRetries: Math.max(0, opts.maxRetries ?? 2),
     fetch: fetchImpl,
     userAgent: `divyastroapi-node/${VERSION}`,
     defaultHeaders: opts.defaultHeaders ?? {},
@@ -92,7 +92,7 @@ function resolveConfig(options: DivyAstroOptions | string): ResolvedConfig {
 export class DivyAstro extends Resources implements ClientCore {
   readonly #config: ResolvedConfig;
 
-  constructor(options: DivyAstroOptions | string) {
+  constructor(options: DivyAstroOptions | string = {}) {
     const config = resolveConfig(options);
     // Build the core before `super()` — it only closes over `config`, not `this`.
     const core: ClientCore = {

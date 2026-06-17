@@ -1,6 +1,6 @@
 {
   "name": "divyastroapi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official Node.js / TypeScript SDK for DivyAstroAPI — Vedic & Western astrology, panchang, matchmaking, dashas, numerology and tarot. DrikPanchang-level precision, pay-per-call.",
   "keywords": [
     "astrology",
@@ -22,7 +22,7 @@
   "homepage": "https://divyastroapi.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DivyGuru/divyastroapi-node.git"
+    "url": "git+https://github.com/DivyGuru/divyastroapi-node.git"
   },
   "bugs": {
     "url": "https://github.com/DivyGuru/divyastroapi-node/issues"

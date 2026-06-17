@@ -181,12 +181,12 @@ class WesternNarrative {
 
   /** Get the authored narrative for a zodiac decan (10° division of a sign). */
   decan<T = unknown>(input: { sign: string; decan: number; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/decan", q.applyExtras(q.qNone(input), input, [["sign", "sign"], ["decan", "decan"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/decan", q.applyExtras(q.qNone(input), input, [["sign", "sign"], ["decan", "decan"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get the authored narrative interpretation for a named fixed star in a natal chart. */
   fixedStar<T = unknown>(input: { star: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/western/narrative/fixed-star/{star}", input, ["star"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>(q.buildPath("/v1/western/narrative/fixed-star/{star}", input, ["star"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get a composed narrative summary of a Western natal chart — authored prose covering Ascendant, Sun, Moon placements and key aspect highlights. */
@@ -196,22 +196,22 @@ class WesternNarrative {
 
   /** Get the authored Sabian symbol and interpretation for a specific zodiac degree (1–360, where 1 = Aries 1° and 360 = Pisces 30°). */
   sabian<T = unknown>(input: { degree: number; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/sabian", q.applyExtras(q.qNone(input), input, [["degree", "degree"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/sabian", q.applyExtras(q.qNone(input), input, [["degree", "degree"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get the Firdaria time-lord narrative for a given planet — the Hellenistic planetary period system (similar to Vimshottari but Ptolemaic). */
   timelordFirdaria<T = unknown>(input: { lord: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/timelord/firdaria", q.applyExtras(q.qNone(input), input, [["lord", "lord"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/timelord/firdaria", q.applyExtras(q.qNone(input), input, [["lord", "lord"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get the authored narrative for the annual profection house — a description of the life themes activated in this profection year. */
   timelordProfection<T = unknown>(input: { house: number; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/timelord/profection", q.applyExtras(q.qNone(input), input, [["house", "house"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/timelord/profection", q.applyExtras(q.qNone(input), input, [["house", "house"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get the authored narrative for a Zodiacal Releasing planetary lord — describes the life-period themes when a given planet is lord in the ZR system. */
   timelordZr<T = unknown>(input: { lord: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/timelord/zr", q.applyExtras(q.qNone(input), input, [["lord", "lord"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/timelord/zr", q.applyExtras(q.qNone(input), input, [["lord", "lord"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get a composed narrative summary of current transits to a natal chart — authored prose for the most exact active transits at the given moment. */
@@ -221,7 +221,7 @@ class WesternNarrative {
 
   /** Get the annual solar-return theme for a sun sign — a deep interpretive essay on the year's archetypal themes for that sign. */
   yearly<T = unknown>(input: { sign: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/narrative/yearly", q.applyExtras(q.qNone(input), input, [["sign", "sign"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/western/narrative/yearly", q.applyExtras(q.qNone(input), input, [["sign", "sign"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 }
 

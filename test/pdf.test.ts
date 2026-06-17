@@ -97,10 +97,16 @@ describe("branding sanitization (security)", () => {
     expect(html).toContain("--brand-secondary: #666666");
   });
 
-  it("accepts valid color forms (hex / named / rgb)", () => {
+  it("accepts valid color forms (hex 3/4/6/8 / named / rgb)", () => {
     expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "#6b21a8" })).toContain("--brand-primary: #6b21a8");
+    expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "#abcd" })).toContain("--brand-primary: #abcd");
     expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "rebeccapurple" })).toContain("--brand-primary: rebeccapurple");
     expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "rgb(107, 33, 168)" })).toContain("--brand-primary: rgb(107, 33, 168)");
+  });
+
+  it("rejects invalid hex lengths (5/7 digit) and falls back", () => {
+    expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "#12345" })).toContain("--brand-primary: #1a1a1a");
+    expect(renderKundliDetailedHtml(kundliDetailed, { primaryColor: "#1234567" })).toContain("--brand-primary: #1a1a1a");
   });
 
   it("drops dangerous logo URL schemes, keeps safe ones", () => {
@@ -149,5 +155,96 @@ describe("htmlToPdf", () => {
     const out = await htmlToPdf("<!doctype html><html></html>", { browser: fakeBrowser });
     expect(pdfCalled).toBe(true);
     expect(Array.from(out.slice(0, 4))).toEqual([0x25, 0x50, 0x44, 0x46]);
+  });
+
+  it("does not close a caller-supplied browser (caller owns it)", async () => {
+    let closed = false;
+    const fakeBrowser = {
+      newPage: async () => ({
+        setContent: async () => {},
+        pdf: async () => new Uint8Array([0x25]),
+        close: async () => {},
+      }),
+      close: async () => {
+        closed = true;
+      },
+    };
+    await htmlToPdf("<!doctype html><html></html>", { browser: fakeBrowser });
+    expect(closed).toBe(false);
+  });
+});
+
+describe("sparse / missing data", () => {
+  const renderers: Array<[string, (d: any, b?: Branding) => string]> = [
+    ["kundliLite", renderKundliLiteHtml],
+    ["kundliDetailed", renderKundliDetailedHtml],
+    ["kundliBrihad", renderKundliBrihadHtml],
+    ["matchMaking", renderMatchMakingHtml],
+    ["dashaAnalysis", renderDashaAnalysisHtml],
+    ["numerology", renderNumerologyHtml],
+    ["sadeSati", renderSadeSatiHtml],
+    ["varshaphal", renderVarshaphalHtml],
+    ["horoscope", renderHoroscopeHtml],
+  ];
+  for (const [name, fn] of renderers) {
+    it(`${name} renders empty {} input without throwing or leaking undefined/NaN`, () => {
+      let html = "";
+      expect(() => {
+        html = fn({});
+      }).not.toThrow();
+      expect(html.startsWith("<!doctype html>")).toBe(true);
+      expect(html).toContain("</html>");
+      expect(html).not.toMatch(/\bundefined\b/);
+      expect(html).not.toMatch(/\bNaN\b/);
+    });
+  }
+});
+
+describe("branding precedence", () => {
+  const withJsonBranding = {
+    ...kundliDetailed,
+    Branding: { CompanyName: "JsonCo", PrimaryColor: "#111111", LogoURL: "https://j/l.png" },
+  };
+
+  it("uses branding embedded in the report JSON when no override is passed", () => {
+    const html = renderKundliDetailedHtml(withJsonBranding);
+    expect(html).toContain("JsonCo");
+    expect(html).toContain("--brand-primary: #111111");
+  });
+
+  it("caller override wins over JSON branding", () => {
+    const html = renderKundliDetailedHtml(withJsonBranding, {
+      companyName: "OverrideCo",
+      primaryColor: "#222222",
+    });
+    expect(html).toContain("OverrideCo");
+    expect(html).not.toContain("JsonCo");
+    expect(html).toContain("--brand-primary: #222222");
+  });
+});
+
+describe("horoscope periods & locale fallback", () => {
+  const base = { rashi: "Aries", rashi_label: "Aries", language: "en", slow_movers: [] };
+
+  it("renders the weekly title", () => {
+    expect(renderHoroscopeHtml({ ...base, period: "weekly", period_key: "2026-W24" })).toContain("Weekly Horoscope");
+  });
+
+  it("renders the monthly title", () => {
+    expect(renderHoroscopeHtml({ ...base, period: "monthly", period_key: "2026-06" })).toContain("Monthly Horoscope");
+  });
+
+  it("falls back to English headings for an unsupported locale without throwing", () => {
+    let html = "";
+    expect(() => {
+      html = renderHoroscopeHtml({
+        ...base,
+        period: "daily",
+        period_key: "2026-06-17",
+        language: "ta",
+        slow_movers: [{ planet: "Jupiter", current_sign: "Cancer", heading: "x", body: "y" }],
+      });
+    }).not.toThrow();
+    expect(html).toContain("Transit Influences"); // English chrome fallback
   });
 });

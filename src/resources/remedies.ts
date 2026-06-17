@@ -11,26 +11,26 @@ export class Remedies {
 
   /** Remedy package attached to a specific rule id. */
   byRuleId<T = unknown>(input: { id: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Full details of a mantra remedy by id. */
   mantra<T = unknown>(input: { id: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/mantra/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/mantra/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Full details of a pooja remedy by id. */
   pooja<T = unknown>(input: { id: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/pooja/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/pooja/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get Vedic astrological remedies for a birth chart — personalised remedies based on weak planets, doshas, and challenging dashas. */
   vedic<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { category?: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/vedic/remedies", q.applyExtras(q.qBirth(input), input, [["category", "category"], ["lang", "lang"]]), opts);
+    return this._c.request<T>("/v1/vedic/remedies", q.applyExtras(q.qBirth(input), input, [["category", "category"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Full details of a vrat remedy by id. */
   vrat<T = unknown>(input: { id: string; lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/vrat/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"]]), opts);
+    return this._c.request<T>(q.buildPath("/v1/vedic/remedies/vrat/{id}", input, ["id"]), q.applyExtras(q.qNone(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 }

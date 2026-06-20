@@ -9,6 +9,7 @@ import {
   renderSadeSatiHtml,
   renderVarshaphalHtml,
   renderHoroscopeHtml,
+  renderMangalDoshaHtml,
   htmlToPdf,
   type Branding,
 } from "../src/pdf/index.js";
@@ -44,6 +45,7 @@ const fixtures: Array<{ name: string; fn: (d: any, b?: Branding) => string; data
   { name: "sadeSati", fn: renderSadeSatiHtml, data: { Locale: "en", Subject: { Name: "T" } } },
   { name: "varshaphal", fn: renderVarshaphalHtml, data: { Locale: "en", Subject: { Name: "T" }, TargetYear: 2026, Ascendant: PLACEMENT, Planets: [{ name: "Sun", placement: PLACEMENT, house_num: 1, retro: false }], Muntha: { sign: "Leo", house: 1 } } },
   { name: "horoscope", fn: renderHoroscopeHtml, data: { rashi: "Aries", rashi_label: "Aries", period: "daily", period_key: "2026-06-07", language: "en", headline: "Good day", slow_movers: [{ planet: "Jupiter", current_sign: "Cancer", heading: "Jupiter transit", body: "Favorable." }], lucky: { color: "Red", number: 9, direction: "East", time: "06:00-08:00" } } },
+  { name: "mangalDosha", fn: renderMangalDoshaHtml, data: { Locale: "en", Subject: { name: "Test", birth_date: "1990-01-15", birth_place: "Mumbai", ascendant_sign: "Leo" }, Status: "purn", HasDosha: true, HousesOccupied: [1, 4, 7], MarsPlacement: { sign: "Aries", dms_within: "10°00'00\"", nakshatra: "Ashwini", pada: 1, nak_lord: "Ketu" } } },
 ];
 
 describe("report templates", () => {
@@ -185,6 +187,7 @@ describe("sparse / missing data", () => {
     ["sadeSati", renderSadeSatiHtml],
     ["varshaphal", renderVarshaphalHtml],
     ["horoscope", renderHoroscopeHtml],
+    ["mangalDosha", renderMangalDoshaHtml],
   ];
   for (const [name, fn] of renderers) {
     it(`${name} renders empty {} input without throwing or leaking undefined/NaN`, () => {
@@ -246,5 +249,136 @@ describe("horoscope periods & locale fallback", () => {
       });
     }).not.toThrow();
     expect(html).toContain("Transit Influences"); // English chrome fallback
+  });
+});
+
+describe("mangalDosha template", () => {
+  const marsPlacement = { sign: "Scorpio", dms_within: "14°22'10\"", nakshatra: "Anuradha", pada: 2, nak_lord: "Saturn" };
+  // A full ("purn") dosha — the heaviest path.
+  const base = {
+    Locale: "en",
+    Subject: { name: "Test Native", birth_date: "1990-01-15", birth_time: "10:30 IST", birth_place: "Mumbai", ascendant_sign: "Leo" },
+    Status: "purn",
+    HasDosha: true,
+    HousesOccupied: [1, 4, 7, 8],
+    Cancelled: false,
+    CancelReasons: [],
+    MarsPlacement: marsPlacement,
+    GeneratedAt: "2026-06-20T10:00:00Z",
+  };
+
+  it("shows Purn badge, heading, diagnosis and full-dosha remedies", () => {
+    const html = renderMangalDoshaHtml(base);
+    expect(html).toContain("Full Mangal Dosha"); // purn status badge text
+    expect(html).toContain("Mangal Dosha Report");
+    expect(html).toContain("1, 4, 7, 8"); // occupied houses in diagnostic + diagnosis
+    expect(html).toContain("full form of Mangal Dosha"); // diagnosis prose
+    expect(html).toContain("Hanuman Chalisa"); // a remedy actually rendered
+    expect(html).toContain("Kumbh Vivah"); // purn-only remedy (proves status→list mapping)
+  });
+
+  it("shows the No-Dosha path: green badge, absence diagnosis, none-remedies", () => {
+    const html = renderMangalDoshaHtml({
+      ...base,
+      Status: "none",
+      HasDosha: false,
+      HousesOccupied: [],
+      MarsPlacement: { sign: "Gemini", dms_within: "02°10'00\"", nakshatra: "Ardra", pada: 1, nak_lord: "Rahu" },
+    });
+    expect(html).toContain("No Mangal Dosha"); // badge
+    expect(html).toContain("status-badge none"); // green badge class
+    expect(html).toContain("Mars does not occupy"); // absence diagnosis
+    expect(html).toContain("no Mangal Dosha-related obstacle"); // marriage prose
+    expect(html).toContain("No specific Mars-related remedies"); // none-remedies
+    expect(html).toContain("<dd>—</dd>"); // empty houses → fallback dash in the diagnostic
+  });
+
+  it("shows the Mild badge for partial dosha", () => {
+    const html = renderMangalDoshaHtml({ ...base, Status: "mild", HousesOccupied: [2] });
+    expect(html).toContain("Mild Mangal Dosha");
+    expect(html).toContain("status-badge mild");
+  });
+
+  it("shows the with-cancellation badge + cancellation block when a present dosha is cancelled", () => {
+    const html = renderMangalDoshaHtml({
+      ...base,
+      Cancelled: true,
+      CancelReasons: ["Jupiter in 7th cancels Dosha", "Mars in own sign"],
+    });
+    expect(html).toContain("Mangal Dosha (with cancellation)"); // badge (NOT reached if HasDosha were false)
+    expect(html).toContain("status-badge cancelled"); // yellow badge class
+    expect(html).toContain("Classical rules indicate"); // cancellation intro
+    expect(html).toContain("Jupiter in 7th cancels Dosha"); // reason 1
+    expect(html).toContain("Mars in own sign"); // reason 2
+    expect(html).toContain("classical cancellation rules apply"); // marriage prose for cancelled
+  });
+
+  it("omits the cancellation block when not cancelled", () => {
+    const html = renderMangalDoshaHtml(base);
+    expect(html).not.toContain("Cancellation</h2>");
+    expect(html).not.toContain("class=\"cancellation\"");
+  });
+
+  it("formats GeneratedAt as YYYY-MM-DD HH:MM UTC (matches the Go server PDF)", () => {
+    const html = renderMangalDoshaHtml(base);
+    expect(html).toContain("2026-06-20 10:00 UTC");
+    expect(html).not.toContain("2026-06-20T10:00:00Z"); // raw ISO must not leak
+  });
+
+  it("shows hindi labels for hi locale", () => {
+    const html = renderMangalDoshaHtml({ ...base, Locale: "hi" });
+    expect(html).toContain("मंगल दोष रिपोर्ट"); // hi title
+    expect(html).toContain("पूर्ण मंगल दोष"); // purn badge in hi
+    expect(html).toContain("हनुमान चालीसा"); // hi remedy (proves locale→remedies)
+  });
+
+  it("escapes injection in subject name and cancel reasons", () => {
+    const html = renderMangalDoshaHtml({
+      ...base,
+      Subject: { ...base.Subject, name: "<script>x</script>" },
+      Cancelled: true,
+      CancelReasons: ["<img src=x onerror=alert(1)>"],
+    });
+    expect(html).not.toContain("<script>x</script>");
+    expect(html).toContain("&lt;script&gt;");
+    expect(html).not.toContain("<img src=x onerror=alert(1)>");
+  });
+
+  it("renders mars placement data", () => {
+    const html = renderMangalDoshaHtml(base);
+    expect(html).toContain("Scorpio");
+    expect(html).toContain("14°22"); // dms_within
+    expect(html).toContain("Anuradha");
+  });
+});
+
+describe("GeneratedAt → YYYY-MM-DD HH:MM UTC (matches Go server PDF, all templates)", () => {
+  const ISO = "2026-06-20T10:00:00Z";
+  const PRETTY = "2026-06-20 10:00 UTC";
+
+  // Every report template that prints GeneratedAt must format it identically —
+  // pretty UTC, never the raw ISO string. (mangalDosha has its own assertion above.)
+  const templates: Array<[string, (d: any, b?: Branding) => string, any]> = [
+    ["kundliLite", renderKundliLiteHtml, { Locale: "en", Subject: { Name: "T" }, GeneratedAt: ISO }],
+    ["kundliDetailed", renderKundliDetailedHtml, { Locale: "en", Subject: { Name: "T" }, GeneratedAt: ISO }],
+    ["kundliBrihad", renderKundliBrihadHtml, { Locale: "en", Subject: { Name: "T" }, GeneratedAt: ISO }],
+    ["matchMaking", renderMatchMakingHtml, { Locale: "en", Boy: { name: "B" }, Girl: { name: "G" }, GeneratedAt: ISO }],
+    ["dashaAnalysis", renderDashaAnalysisHtml, { Locale: "en", Subject: { Name: "T" }, GeneratedAt: ISO }],
+    ["numerology", renderNumerologyHtml, { dob: "1990-01-15", GeneratedAt: ISO }],
+    ["sadeSati", renderSadeSatiHtml, { Locale: "en", Subject: { name: "T" }, GeneratedAt: ISO }],
+    ["varshaphal", renderVarshaphalHtml, { Locale: "en", Subject: { Name: "T" }, TargetYear: 2026, GeneratedAt: ISO }],
+  ];
+
+  for (const [name, fn, data] of templates) {
+    it(`${name} formats GeneratedAt and never leaks raw ISO`, () => {
+      const html = fn(data);
+      expect(html).toContain(PRETTY);
+      expect(html).not.toContain(ISO);
+    });
+  }
+
+  it("falls back to the raw string when GeneratedAt is unparseable", () => {
+    const html = renderSadeSatiHtml({ Locale: "en", Subject: { name: "T" }, GeneratedAt: "not-a-date" });
+    expect(html).toContain("not-a-date");
   });
 });

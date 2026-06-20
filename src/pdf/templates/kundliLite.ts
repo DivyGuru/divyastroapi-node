@@ -160,6 +160,21 @@ const EXTRA_CSS = `
  * @param branding Optional caller branding overrides (win per-field over the
  *                 branding embedded in `data.Branding`).
  */
+/**
+ * Format an ISO-8601 timestamp into the `YYYY-MM-DD HH:MM UTC` shape the Go
+ * template produces via `GeneratedAt.Format("2006-01-02 15:04 MST")`. Falls
+ * back to the raw string if it isn't parseable.
+ */
+function formatGenerated(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(
+    d.getUTCHours(),
+  )}:${p(d.getUTCMinutes())} UTC`;
+}
+
 export function renderKundliLiteHtml(data: KundliLiteData, branding?: Branding): string {
   const b = resolveBranding(data.Branding, branding);
   const locale = data.Locale || "en";
@@ -179,7 +194,7 @@ export function renderKundliLiteHtml(data: KundliLiteData, branding?: Branding):
     ${esc(subject.BirthPlace)}
   </div>
   <div class="generated">
-    ${esc(label("generated"))} ${esc(data.GeneratedAt)}
+    ${esc(label("generated"))} ${esc(formatGenerated(data.GeneratedAt))}
   </div>
 </section>`;
 

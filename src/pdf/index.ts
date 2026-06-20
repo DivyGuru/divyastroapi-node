@@ -32,6 +32,7 @@ import { renderNumerologyHtml } from "./templates/numerology.js";
 import { renderSadeSatiHtml } from "./templates/sadeSati.js";
 import { renderVarshaphalHtml } from "./templates/varshaphal.js";
 import { renderHoroscopeHtml } from "./templates/horoscope.js";
+import { renderMangalDoshaHtml } from "./templates/mangalDosha.js";
 import { htmlToPdf, type HtmlToPdfOptions } from "./render.js";
 import type { Branding } from "./shared.js";
 
@@ -47,6 +48,7 @@ export { renderMatchMakingHtml, type MatchMakingData } from "./templates/matchMa
 export { renderDashaAnalysisHtml, type DashaAnalysisData } from "./templates/dashaAnalysis.js";
 export { renderNumerologyHtml, type NumerologyData } from "./templates/numerology.js";
 export { renderSadeSatiHtml, type SadeSatiData } from "./templates/sadeSati.js";
+export { renderMangalDoshaHtml, type MangalDoshaData } from "./templates/mangalDosha.js";
 export { renderVarshaphalHtml, type VarshaphalData } from "./templates/varshaphal.js";
 export { renderHoroscopeHtml, type HoroscopeData } from "./templates/horoscope.js";
 
@@ -96,3 +98,6 @@ export const varshaphalPdf = (data: Parameters<typeof renderVarshaphalHtml>[0], 
 /** Horoscope (daily/weekly/monthly) → PDF. */
 export const horoscopePdf = (data: Parameters<typeof renderHoroscopeHtml>[0], opts?: ReportPdfOptions) =>
   toPdf(renderHoroscopeHtml, data, opts);
+/** Mangal Dosha (Manglik) → PDF. */
+export const mangalDoshaPdf = (data: Parameters<typeof renderMangalDoshaHtml>[0], opts?: ReportPdfOptions) =>
+  toPdf(renderMangalDoshaHtml, data, opts);

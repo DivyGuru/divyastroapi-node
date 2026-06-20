@@ -312,6 +312,21 @@ function timelineBlocks(rows: DashaPeriodView[], locale: string): string {
  * Render the Dasha Analysis report as a complete, self-contained HTML document
  * ready to convert to PDF.
  */
+/**
+ * Format an ISO-8601 timestamp into the `YYYY-MM-DD HH:MM UTC` shape the Go
+ * template produces via `GeneratedAt.Format("2006-01-02 15:04 MST")`. Falls
+ * back to the raw string if it isn't parseable.
+ */
+function formatGenerated(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(
+    d.getUTCHours(),
+  )}:${p(d.getUTCMinutes())} UTC`;
+}
+
 export function renderDashaAnalysisHtml(
   data: DashaAnalysisData,
   branding?: Branding,
@@ -325,7 +340,7 @@ export function renderDashaAnalysisHtml(
 
   // --- Cover ---
   const generatedLine = data.GeneratedAt
-    ? `<div class="generated">${esc(label("generated"))} ${esc(data.GeneratedAt)}</div>`
+    ? `<div class="generated">${esc(label("generated"))} ${esc(formatGenerated(data.GeneratedAt))}</div>`
     : "";
   const cover = `<section class="cover">
 ${coverBrandingHtml(b)}

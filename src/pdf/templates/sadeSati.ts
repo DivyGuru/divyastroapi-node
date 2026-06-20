@@ -367,6 +367,21 @@ function windowsTable(
  * Render the Sade Sati report as a complete, self-contained HTML document
  * ready to convert to PDF.
  */
+/**
+ * Format an ISO-8601 timestamp into the `YYYY-MM-DD HH:MM UTC` shape the Go
+ * template produces via `GeneratedAt.Format("2006-01-02 15:04 MST")`. Falls
+ * back to the raw string if it isn't parseable.
+ */
+function formatGenerated(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(
+    d.getUTCHours(),
+  )}:${p(d.getUTCMinutes())} UTC`;
+}
+
 export function renderSadeSatiHtml(data: SadeSatiData, branding?: Branding): string {
   const loc = data.Locale ?? "";
   const b = resolveBranding(data.Branding, branding);
@@ -387,7 +402,7 @@ export function renderSadeSatiHtml(data: SadeSatiData, branding?: Branding): str
     ${esc(label(loc, "moon_sign"))}: ${esc(subject.moon_sign)}
   </div>
   <div class="generated">
-    ${esc(label(loc, "generated"))} ${esc(data.GeneratedAt)}
+    ${esc(label(loc, "generated"))} ${esc(formatGenerated(data.GeneratedAt))}
   </div>
 </section>`;
 

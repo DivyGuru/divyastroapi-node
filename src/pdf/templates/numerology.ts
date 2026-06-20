@@ -350,6 +350,21 @@ function numberSection(
 /**
  * Render the numerology report as a complete HTML document.
  */
+/**
+ * Format an ISO-8601 timestamp into the `YYYY-MM-DD HH:MM UTC` shape the Go
+ * template produces via `GeneratedAt.Format("2006-01-02 15:04 MST")`. Falls
+ * back to the raw string if it isn't parseable.
+ */
+function formatGenerated(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(
+    d.getUTCHours(),
+  )}:${p(d.getUTCMinutes())} UTC`;
+}
+
 export function renderNumerologyHtml(data: NumerologyData, branding?: Branding): string {
   const b = resolveBranding(data.Branding, branding);
   const locale = pickLocale(data.Locale);
@@ -373,7 +388,7 @@ export function renderNumerologyHtml(data: NumerologyData, branding?: Branding):
     <div class="summary-card"><div class="number">${nz(data.personality, "—")}</div><div class="label">${esc(label("personality"))}</div></div>
     <div class="summary-card"><div class="number">${nz(data.destiny, "—")}</div><div class="label">${esc(label("destiny"))}</div></div>
   </div>
-  ${data.GeneratedAt ? `<div class="generated">${esc(label("generated"))} ${esc(data.GeneratedAt)}</div>` : ""}
+  ${data.GeneratedAt ? `<div class="generated">${esc(label("generated"))} ${esc(formatGenerated(data.GeneratedAt))}</div>` : ""}
 </section>`;
 
   // Per-number interpretation sections.

@@ -546,6 +546,21 @@ const EXTRA_CSS = `
  * @param data     The JSON returned by `GET /v1/reports/kundli/brihad`.
  * @param branding Optional caller branding overrides (merged over `data.Branding`).
  */
+/**
+ * Format an ISO-8601 timestamp into the `YYYY-MM-DD HH:MM UTC` shape the Go
+ * template produces via `GeneratedAt.Format("2006-01-02 15:04 MST")`. Falls
+ * back to the raw string if it isn't parseable.
+ */
+function formatGenerated(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(
+    d.getUTCHours(),
+  )}:${p(d.getUTCMinutes())} UTC`;
+}
+
 export function renderKundliBrihadHtml(data: KundliBrihadData, branding?: Branding): string {
   const b = resolveBranding(data.Branding, branding);
   const loc = pickLocale(data.Locale);
@@ -575,7 +590,7 @@ ${esc(label("born"))} ${esc(subject.BirthDate)} ${esc(label("at"))} ${esc(subjec
 ${esc(subject.BirthPlace)}
 </div>
 <div class="generated">
-${esc(label("generated"))} ${esc(data.GeneratedAt)}
+${esc(label("generated"))} ${esc(formatGenerated(data.GeneratedAt))}
 </div>
 </section>`);
 

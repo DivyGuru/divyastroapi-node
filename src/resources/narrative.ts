@@ -155,8 +155,8 @@ export class Narrative {
   }
 
   /** Get a narrative interpretation of the Ashtakavarga transit scores for a birth chart — written analysis of how current planetary transits score against the natal chart's benefic-point grid, with guidance on which transits are favourable or challenging. */
-  transitAshtakavarga<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/vedic/narrative/transit-ashtakavarga", q.applyExtras(q.qBirthPrefixed(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
+  transitAshtakavarga<T = unknown>(input: { birthDate: string; birthTime: string; birthTz: string; lat: number; lon: number; lang?: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/vedic/narrative/transit-ashtakavarga", q.applyExtras(q.qNone(input), input, [["birthDate", "birth.date"], ["birthTime", "birth.time"], ["birthTz", "birth.tz"], ["lat", "lat"], ["lon", "lon"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Get a narrative of the Double Transit analysis — written explanation of which life events the current Jupiter-Saturn joint transit is activating in the chart, and when the confluence is strongest. */
@@ -170,8 +170,8 @@ export class Narrative {
   }
 
   /** Get a narrative of the key themes for the current Varshaphal (solar-return) year — written analysis of the annual chart's varsha lord, muntha, annual lagna, and tajika yogas as a prediction for the year's major themes. */
-  varshaphalThemes<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { lang?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/vedic/narrative/varshaphal-themes", q.applyExtras(q.qBirthPrefixed(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
+  varshaphalThemes<T = unknown>(input: { birthDate: string; birthTime: string; birthTz: string; lat: number; lon: number; year: number; lang?: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/vedic/narrative/varshaphal-themes", q.applyExtras(q.qNone(input), input, [["birthDate", "birth.date"], ["birthTime", "birth.time"], ["birthTz", "birth.tz"], ["lat", "lat"], ["lon", "lon"], ["year", "year"], ["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
   /** Personalised yearly Bhavishyafal (annual horoscope) for a target year. */

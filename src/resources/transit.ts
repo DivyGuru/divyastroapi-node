@@ -10,8 +10,8 @@ export class Transit {
   constructor(private readonly _c: ClientCore) {}
 
   /** Score current planetary transits against a natal chart using Ashtakavarga — shows which houses transiting planets are moving through and how many benefic points those signs have in the natal chart. */
-  ashtakavarga<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/transit/ashtakavarga", q.qBirthPrefixed(input), opts);
+  ashtakavarga<T = unknown>(input: Types.NatalTransitInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/transit/ashtakavarga", q.qNatalTransit(input), opts);
   }
 
   /** Compute Double Transit (Jupiter-Saturn-Rahu joint transit) analysis — the classical technique where an event manifests only when Jupiter AND Saturn both transit houses connected to a natal significator simultaneously. */
@@ -30,8 +30,8 @@ export class Transit {
   }
 
   /** Check whether a person is currently in Small Panoti (Ashtama Shani) — the 2.5-year Saturn transit through the 8th house from natal Moon, considered challenging. */
-  smallPanoti<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { at?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/transit/small-panoti", q.applyExtras(q.qBirthPrefixed(input), input, [["at", "at"]]), opts);
+  smallPanoti<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { date?: string; time?: string; tz?: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/transit/small-panoti", q.applyExtras(q.qBirthPrefixed(input), input, [["date", "date"], ["time", "time"], ["tz", "tz"]]), opts);
   }
 
   /** Get the complete history and future windows of Small Panoti (Ashtama Shani) for a natal chart — all past and upcoming 2.5-year periods when Saturn transits the 8th house from natal Moon. */
@@ -40,12 +40,12 @@ export class Transit {
   }
 
   /** Compute Tara Bala for today's transiting Moon relative to a natal chart — rates the day as Janma/Sampat/Vipat/Kshema/Pratyak/Sadhana/Vadha/Mitra/Param-Mitra tara. */
-  tarabala<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/transit/tarabala", q.qBirthPrefixed(input), opts);
+  tarabala<T = unknown>(input: Types.NatalTransitInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/transit/tarabala", q.qNatalTransit(input), opts);
   }
 
   /** Check Vedha (transit obstruction) for a natal chart — certain house transits are blocked (vedha'd) by another planet transiting a specific opposing house simultaneously. */
-  vedha<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/transit/vedha", q.qBirthPrefixed(input), opts);
+  vedha<T = unknown>(input: Types.NatalTransitInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/transit/vedha", q.qNatalTransit(input), opts);
   }
 }

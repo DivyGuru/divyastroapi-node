@@ -10,22 +10,22 @@ export class Ashtakavarga {
   constructor(private readonly _c: ClientCore) {}
 
   /** Bhinnashtakavarga (BAV) for one planet. */
-  bhinna<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { planet: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>(q.buildPath("/v1/ashtakavarga/bhinna/{planet}", input, ["planet"]), q.qBirth(input), opts);
+  bhinna<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { planet: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>(q.buildPath("/v1/ashtakavarga/bhinna/{planet}", input, ["planet"]), q.qBirthPrefixed(input), opts);
   }
 
   /** Get Kaksha (sub-division) level Ashtakavarga analysis — divides each sign into 8 equal 3°45′ segments, each ruled by a graha. */
-  kaksha<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/ashtakavarga/kaksha", q.qBirth(input), opts);
+  kaksha<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { date: string; tz: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/ashtakavarga/kaksha", q.applyExtras(q.qBirthPrefixed(input), input, [["date", "date"], ["tz", "tz"]]), opts);
   }
 
   /** Get the Sarvashtakavarga table — the combined 12-sign benefic-point grid from all 9 grahas. */
-  sarva<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/ashtakavarga/sarva", q.qBirth(input), opts);
+  sarva<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/ashtakavarga/sarva", q.qBirthPrefixed(input), opts);
   }
 
   /** Score current (or a given date's) planetary transits against a natal chart using Ashtakavarga benefic points. */
-  transitScore<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { transitDate?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/ashtakavarga/transit-score", q.applyExtras(q.qBirth(input), input, [["transitDate", "transit_date"]]), opts);
+  transitScore<T = unknown>(input: Types.BirthInput & Types.VedicMomentSettings & { date: string; tz: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/ashtakavarga/transit-score", q.applyExtras(q.qBirthPrefixed(input), input, [["date", "date"], ["tz", "tz"]]), opts);
   }
 }

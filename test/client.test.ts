@@ -406,3 +406,23 @@ describe("escape hatch", () => {
     expect(await makeClient(fetch).get("/v1/x")).toEqual({ ok: 1 });
   });
 });
+
+describe("non-enveloped success bodies", () => {
+  // A few endpoints return a bare array or a top-level object WITHOUT a `data`
+  // key. The transport must return those verbatim and NOT try to unwrap a
+  // missing `data` (regression guard for http.ts envelope handling).
+  it("returns a bare array body as-is", async () => {
+    const { fetch } = mockFetch(() => ({ body: [1, 2, 3] }));
+    expect(await makeClient(fetch).request("/v1/list")).toEqual([1, 2, 3]);
+  });
+
+  it("returns a no-`data` object body as-is", async () => {
+    const { fetch } = mockFetch(() => ({ body: { foo: 1, bar: 2 } }));
+    expect(await makeClient(fetch).request("/v1/raw")).toEqual({ foo: 1, bar: 2 });
+  });
+
+  it("returns a non-JSON success body as the raw string", async () => {
+    const { fetch } = mockFetch(() => ({ body: "plain text" }));
+    expect(await makeClient(fetch).request("/v1/text")).toBe("plain text");
+  });
+});

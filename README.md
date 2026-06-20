@@ -127,7 +127,7 @@ await client.chart.planets({ ...birth, ayanamsa: "krishnamurti", houseSystem: "p
 | `milan` | Ashtakoota (total / full / per-koota), mangal/nadi/shani dosha, navamsa & dasha compatibility |
 | `transit` | positions, sade-sati, ashtakavarga, tarabala, vedha, double-transit, small-panoti |
 | `horoscope` | daily / weekly / monthly by rashi |
-| `numerology` | driver, conductor, soul, personality, destiny, full, advanced, challenges, periods |
+| `numerology` | driver, conductor, soul, personality, destiny, full, advanced, challenges, personalPeriods |
 | `muhurta` | vivah, naamkaran, griha-pravesh, vyapar, yatra, best-time, … |
 | `varshaphal` | annual chart, lord, muntha, mudda-dasha, harsha-bala, tajika yogas |
 | `prashna` | horary answer, chart, arudha, significators |
@@ -155,7 +155,7 @@ await client.western.returns.solar({ date, time, tz, lat, lon, returnYear: 2026 
 await client.western.profections.annual({ birthDate: "1990-01-15", ascSign: "capricorn" });
 ```
 
-Sub-namespaces: `natal`, `houses`, `synastry`, `composite`, `davison`, `transits`,
+Sub-namespaces: `natal`, `horoscope`, `synastry`, `composite`, `davison`, `transits`,
 `progressions`, `solarArc`, `returns`, `dignities`, `profections`, `zodiacalReleasing`,
 `primaryDirections`, `interpretation`, `narrative`, `heliocentric`, `astrocartography`,
 `eclipses`, `lunar`, `compatibility`, plus `firdaria`, `ingresses`, `retrogradeWindow`.

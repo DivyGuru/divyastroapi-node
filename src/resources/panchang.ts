@@ -110,8 +110,8 @@ export class Panchang {
   }
 
   /** Get solar Sankranti (Sun's sign ingress) dates for a year — the exact moment the Sun enters each of the 12 sidereal signs, including Makar Sankranti (Capricorn), Mesh Sankranti (Aries/New Year), and all others. */
-  sankranti<T = unknown>(input: { year: number; tz?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/panchang/sankranti", q.applyExtras(q.qNone(input), input, [["year", "year"], ["tz", "tz"]]), opts);
+  sankranti<T = unknown>(input: { date: string; tz: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/panchang/sankranti", q.applyExtras(q.qNone(input), input, [["date", "date"], ["tz", "tz"]]), opts);
   }
 
   /** Siddha Yoga vara+nakshatra auspicious combination check. */

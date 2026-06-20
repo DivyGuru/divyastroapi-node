@@ -15,12 +15,12 @@ export class Horoscope {
   }
 
   /** Monthly horoscope by rashi. */
-  monthly<T = unknown>(input: Types.RashiInput, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/horoscope/monthly", q.qRashi(input), opts);
+  monthly<T = unknown>(input: Types.RashiInput & { month: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/horoscope/monthly", q.applyExtras(q.qRashi(input), input, [["month", "month"]]), opts);
   }
 
   /** Weekly horoscope by rashi. */
-  weekly<T = unknown>(input: Types.RashiInput, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/horoscope/weekly", q.qRashi(input), opts);
+  weekly<T = unknown>(input: Types.RashiInput & { week: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/horoscope/weekly", q.applyExtras(q.qRashi(input), input, [["week", "week"]]), opts);
   }
 }

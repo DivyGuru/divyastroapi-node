@@ -33,14 +33,12 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
     },
     "./pdf": {
-      "types": "./dist/pdf/index.d.ts",
-      "import": "./dist/pdf/index.js",
-      "require": "./dist/pdf/index.cjs"
+      "import": { "types": "./dist/pdf/index.d.ts", "default": "./dist/pdf/index.js" },
+      "require": { "types": "./dist/pdf/index.d.cts", "default": "./dist/pdf/index.cjs" }
     },
     "./package.json": "./package.json"
   },

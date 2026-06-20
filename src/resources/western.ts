@@ -96,13 +96,13 @@ class WesternDignities {
   }
 
   /** Essential dignities for a planet (domicile/exaltation/triplicity/bound/face + almuten). */
-  planet<T = unknown>(input: Types.WesternNatalInput & { planet: string; scheme?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/dignities/planet", q.applyExtras(q.qWesternNatal(input), input, [["planet", "planet"], ["scheme", "scheme"]]), opts);
+  planet<T = unknown>(input: { planet: string; lon: number; diurnal?: boolean; scheme?: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/western/dignities/planet", q.applyExtras(q.qNone(input), input, [["planet", "planet"], ["lon", "lon"], ["diurnal", "diurnal"], ["scheme", "scheme"]]), opts);
   }
 
   /** Compute essential dignities and mutual receptions for a Western birth chart — each planet's essential dignity state (domicile, exaltation, triplicity, term, face, detriment, fall), any mutual reception pairs, and the overall dignity score. */
-  receptions<T = unknown>(input: Types.WesternNatalInput, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/dignities/receptions", q.qWesternNatal(input), opts);
+  receptions<T = unknown>(input: { sun?: number; moon?: number; mercury?: number; venus?: number; mars?: number; jupiter?: number; saturn?: number } = {}, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/western/dignities/receptions", q.applyExtras(q.qNone(input), input, [["sun", "sun"], ["moon", "moon"], ["mercury", "mercury"], ["venus", "venus"], ["mars", "mars"], ["jupiter", "jupiter"], ["saturn", "saturn"]]), opts);
   }
 
   /** Get the triplicity (element) ruler for a zodiac degree — shows which planet rules by fire/earth/air/water triplicity, with day and night rulers. */
@@ -120,8 +120,8 @@ class WesternEclipses {
   }
 
   /** Check whether upcoming eclipses are visible from a specific location — returns visibility type (total, partial, annular, not visible) and times of contact. */
-  visibility<T = unknown>(input: { lat: number; lon: number; from?: string }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/eclipses/visibility", q.applyExtras(q.qNone(input), input, [["lat", "lat"], ["lon", "lon"], ["from", "from"]]), opts);
+  visibility<T = unknown>(input: { lat: number; lon: number; startDate: string; endDate: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/western/eclipses/visibility", q.applyExtras(q.qNone(input), input, [["lat", "lat"], ["lon", "lon"], ["startDate", "start_date"], ["endDate", "end_date"]]), opts);
   }
 }
 
@@ -456,7 +456,7 @@ class WesternReturns {
 
   /** Get the exact Julian Day (JD) and calendar datetime of the Western (tropical) solar return for a given year — the precise moment the Sun returns to its natal tropical longitude. */
   solarExactJd<T = unknown>(input: Types.WesternNatalInput & { year: number }, opts?: RequestOptions): Promise<T> {
-    return this._c.request<T>("/v1/western/returns/solar/exact-jd", q.applyExtras(q.qWesternNatal(input), input, [["year", "year"]]), opts);
+    return this._c.request<T>("/v1/western/returns/solar/exact-jd", q.applyExtras(q.qWesternNatal(input), input, [["year", "return_year"]]), opts);
   }
 }
 

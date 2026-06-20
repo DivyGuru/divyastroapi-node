@@ -654,9 +654,14 @@
         "required": true
       },
       {
-        "wire": "from",
+        "wire": "start_date",
         "type": "string",
-        "required": false
+        "required": true
+      },
+      {
+        "wire": "end_date",
+        "type": "string",
+        "required": true
       }
     ],
     "desc": "Check whether upcoming eclipses are visible from a specific location — returns visibility type (total, partial, annular, not visible) and times of contact."
@@ -1277,9 +1282,34 @@
   },
   {
     "path": "/v1/vedic/narrative/transit-ashtakavarga",
-    "shape": "birthPrefixed",
+    "shape": "custom",
     "pathParams": [],
     "extras": [
+      {
+        "wire": "birth.date",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "birth.time",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "birth.tz",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "lat",
+        "type": "number",
+        "required": true
+      },
+      {
+        "wire": "lon",
+        "type": "number",
+        "required": true
+      },
       {
         "wire": "lang",
         "type": "string",
@@ -1316,9 +1346,39 @@
   },
   {
     "path": "/v1/vedic/narrative/varshaphal-themes",
-    "shape": "birthPrefixed",
+    "shape": "custom",
     "pathParams": [],
     "extras": [
+      {
+        "wire": "birth.date",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "birth.time",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "birth.tz",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "lat",
+        "type": "number",
+        "required": true
+      },
+      {
+        "wire": "lon",
+        "type": "number",
+        "required": true
+      },
+      {
+        "wire": "year",
+        "type": "integer",
+        "required": true
+      },
       {
         "wire": "lang",
         "type": "string",
@@ -1347,11 +1407,6 @@
     "extras": [
       {
         "wire": "lang",
-        "type": "string",
-        "required": false
-      },
-      {
-        "wire": "format",
         "type": "string",
         "required": false
       }
@@ -1399,11 +1454,6 @@
         "wire": "lang",
         "type": "string",
         "required": false
-      },
-      {
-        "wire": "format",
-        "type": "string",
-        "required": false
       }
     ],
     "desc": "Generate the Brihad (comprehensive) Kundli report — the most detailed birth chart report covering chart analysis, all divisional charts (D1–D60), planetary strengths (Shadbala), ashtakavarga, all dashas, yogas, doshas, remedies, and lifetime predictions."
@@ -1415,11 +1465,6 @@
     "extras": [
       {
         "wire": "lang",
-        "type": "string",
-        "required": false
-      },
-      {
-        "wire": "format",
         "type": "string",
         "required": false
       }
@@ -1435,11 +1480,6 @@
         "wire": "lang",
         "type": "string",
         "required": false
-      },
-      {
-        "wire": "format",
-        "type": "string",
-        "required": false
       }
     ],
     "desc": "Generate a Lite Kundli report — a concise birth chart summary with lagna, Moon sign, nakshatra, key planets, current dasha, and a brief personality reading."
@@ -1451,11 +1491,6 @@
     "extras": [
       {
         "wire": "lang",
-        "type": "string",
-        "required": false
-      },
-      {
-        "wire": "format",
         "type": "string",
         "required": false
       }
@@ -1507,11 +1542,6 @@
         "wire": "lang",
         "type": "string",
         "required": false
-      },
-      {
-        "wire": "format",
-        "type": "string",
-        "required": false
       }
     ],
     "desc": "Generate a comprehensive Sade Sati report — covers current Sade Sati status, all past and upcoming cycles from birth to age 90, phase-by-phase narrative for the current or next cycle, and detailed remedies (mantras, donations, Shani puja guidance)."
@@ -1523,11 +1553,6 @@
     "extras": [
       {
         "wire": "lang",
-        "type": "string",
-        "required": false
-      },
-      {
-        "wire": "format",
         "type": "string",
         "required": false
       }
@@ -1600,9 +1625,45 @@
   },
   {
     "path": "/v1/western/dignities/receptions",
-    "shape": "westernNatal",
+    "shape": "custom",
     "pathParams": [],
-    "extras": [],
+    "extras": [
+      {
+        "wire": "sun",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "moon",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "mercury",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "venus",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "mars",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "jupiter",
+        "type": "number",
+        "required": false
+      },
+      {
+        "wire": "saturn",
+        "type": "number",
+        "required": false
+      }
+    ],
     "desc": "Compute essential dignities and mutual receptions for a Western birth chart — each planet's essential dignity state (domicile, exaltation, triplicity, term, face, detriment, fall), any mutual reception pairs, and the overall dignity score."
   },
   {
@@ -1657,36 +1718,53 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "year",
+        "wire": "return_year",
         "type": "integer",
-        "required": true
+        "required": true,
+        "name": "year"
       }
     ],
     "desc": "Get the exact Julian Day (JD) and calendar datetime of the Western (tropical) solar return for a given year — the precise moment the Sun returns to its natal tropical longitude."
   },
   {
     "path": "/v1/ashtakavarga/sarva",
-    "shape": "birth",
+    "shape": "birthPrefixed",
     "pathParams": [],
     "extras": [],
     "desc": "Get the Sarvashtakavarga table — the combined 12-sign benefic-point grid from all 9 grahas."
   },
   {
     "path": "/v1/ashtakavarga/kaksha",
-    "shape": "birth",
+    "shape": "birthPrefixed",
     "pathParams": [],
-    "extras": [],
+    "extras": [
+      {
+        "wire": "date",
+        "type": "string",
+        "required": true
+      },
+      {
+        "wire": "tz",
+        "type": "string",
+        "required": true
+      }
+    ],
     "desc": "Get Kaksha (sub-division) level Ashtakavarga analysis — divides each sign into 8 equal 3°45′ segments, each ruled by a graha."
   },
   {
     "path": "/v1/ashtakavarga/transit-score",
-    "shape": "birth",
+    "shape": "birthPrefixed",
     "pathParams": [],
     "extras": [
       {
-        "wire": "transit_date",
+        "wire": "date",
         "type": "string",
-        "required": false
+        "required": true
+      },
+      {
+        "wire": "tz",
+        "type": "string",
+        "required": true
       }
     ],
     "desc": "Score current (or a given date's) planetary transits against a natal chart using Ashtakavarga benefic points."
@@ -1715,19 +1793,14 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "year",
-        "type": "integer",
-        "required": true
-      },
-      {
-        "wire": "month",
-        "type": "integer",
+        "wire": "date",
+        "type": "string",
         "required": true
       },
       {
         "wire": "tz",
         "type": "string",
-        "required": false
+        "required": true
       }
     ],
     "desc": "Get the Hindu calendar details for a Gregorian month — maps each day to its Hindu month (Chaitra/Vaishakha/…), paksha (Shukla/Krishna), tithi, and Vikram Samvat year."
@@ -1738,14 +1811,14 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "year",
-        "type": "integer",
+        "wire": "date",
+        "type": "string",
         "required": true
       },
       {
         "wire": "tz",
         "type": "string",
-        "required": false
+        "required": true
       }
     ],
     "desc": "Get the current Hindu Ritu (season) for a date — one of 6 seasons: Vasanta (spring), Grishma (summer), Varsha (monsoon), Sharad (autumn), Hemanta (pre-winter), Shishira (winter)."
@@ -1756,14 +1829,14 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "year",
-        "type": "integer",
+        "wire": "date",
+        "type": "string",
         "required": true
       },
       {
         "wire": "tz",
         "type": "string",
-        "required": false
+        "required": true
       }
     ],
     "desc": "Get the Samvatsara (Jupiter year) name for a given year — the 60-year Jupiter cycle used in Hindu astrology (Prabhava, Vibhava, Shukla, … Akshaya)."
@@ -1821,13 +1894,6 @@
       }
     ],
     "desc": "Get the KP sublord of a planet — the sub-lord of the nakshatra sub-division the planet occupies (KP star lord → sub lord → sub-sub lord chain)."
-  },
-  {
-    "path": "/v1/dasha/yogini",
-    "shape": "birth",
-    "pathParams": [],
-    "extras": [],
-    "desc": "Get the full Yogini Dasha sequence for a birth chart — all 8 Yogini lords (Mangala, Pingala, Dhanya, Bhramari, Bhadrika, Ulka, Siddha, Sankata) with start/end dates across 36 years."
   },
   {
     "path": "/v1/festivals/on-date",
@@ -1964,134 +2030,30 @@
   },
   {
     "path": "/v1/muhurta/graha-pravesh",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find auspicious Griha Pravesh (housewarming) muhurta windows in a date range — checks tithi, nakshatra, vara, Sun position, and lagna for the ceremony."
   },
   {
     "path": "/v1/muhurta/panchaka-rahita",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find Panchaka-free (Panchaka Rahita) windows in a date range — Panchaka occurs when Moon is in Aquarius or Pisces and creates obstacles for travel, construction, funerals, and certain ceremonies."
   },
   {
     "path": "/v1/muhurta/sarvartha-siddhi",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find Sarvartha Siddhi Yoga windows — one of the most auspicious panchang yogas formed by specific vara+nakshatra combinations."
   },
   {
     "path": "/v1/muhurta/shubha-yoga",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find Shubha Yoga (auspicious panchang yoga) windows in a date range — checks for Amrit Siddhi, Sarvartha Siddhi, Ravi Yoga, and other classical panchang yogas in combination."
   },
   {
@@ -2109,68 +2071,16 @@
   },
   {
     "path": "/v1/muhurta/vyapar",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find auspicious Vyapar (business/trade) muhurta windows — suitable for starting a business, signing contracts, launching a product, or opening a shop."
   },
   {
     "path": "/v1/muhurta/yatra",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "start_date",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "end_date",
-        "type": "string",
-        "required": true
-      }
-    ],
+    "extras": [],
     "desc": "Find auspicious Yatra (travel/journey) muhurta windows — avoids Disha Shool (directional inauspiciousness), Rahu Kaal, Nak Shool, and favours Pushya/Hasta/Ashwini/Anuradha nakshatras for journeys."
   },
   {
@@ -2297,14 +2207,14 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "year",
-        "type": "integer",
+        "wire": "date",
+        "type": "string",
         "required": true
       },
       {
         "wire": "tz",
         "type": "string",
-        "required": false
+        "required": true
       }
     ],
     "desc": "Get solar Sankranti (Sun's sign ingress) dates for a year — the exact moment the Sun enters each of the 12 sidereal signs, including Makar Sankranti (Capricorn), Mesh Sankranti (Aries/New Year), and all others."
@@ -2320,14 +2230,24 @@
         "required": true
       },
       {
-        "wire": "start_date",
+        "wire": "date",
         "type": "string",
         "required": true
       },
       {
-        "wire": "end_date",
+        "wire": "time",
+        "type": "string",
+        "required": false
+      },
+      {
+        "wire": "tz",
         "type": "string",
         "required": true
+      },
+      {
+        "wire": "max_days",
+        "type": "integer",
+        "required": false
       }
     ],
     "desc": "Find the combustion window for a planet — the date range when the planet is too close to the Sun (within classical combust limits) and loses strength."
@@ -2345,146 +2265,58 @@
       {
         "wire": "date",
         "type": "string",
+        "required": true
+      },
+      {
+        "wire": "time",
+        "type": "string",
         "required": false
+      },
+      {
+        "wire": "tz",
+        "type": "string",
+        "required": true
       }
     ],
     "desc": "Get the current speed and motion state of a planet — degrees per day, whether it is direct/retrograde/stationary, and its speed relative to mean motion."
   },
   {
     "path": "/v1/prashna/arudha",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "question",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "at",
-        "type": "string",
-        "required": false
-      }
-    ],
+    "extras": [],
     "desc": "Compute the Arudha Lagna of a Prashna chart — the perceived image/manifestation of the question's subject."
   },
   {
     "path": "/v1/prashna/chart",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "question",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "at",
-        "type": "string",
-        "required": false
-      }
-    ],
+    "extras": [],
     "desc": "Cast the full Prashna (horary) chart for the moment a question is asked — returns lagna, all planet placements, houses, and panchang at the moment of the question."
   },
   {
     "path": "/v1/prashna/lagna-lord",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
-    "extras": [
-      {
-        "wire": "lat",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "question",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "at",
-        "type": "string",
-        "required": false
-      }
-    ],
+    "extras": [],
     "desc": "Get the lagna lord analysis for a Prashna chart — where the lagna lord is placed, its strength, and what it indicates about the querent's situation and chances of success."
   },
   {
     "path": "/v1/prashna/significators",
-    "shape": "custom",
+    "shape": "moment",
     "pathParams": [],
     "extras": [
       {
-        "wire": "lat",
-        "type": "number",
+        "wire": "house",
+        "type": "integer",
         "required": true
-      },
-      {
-        "wire": "lon",
-        "type": "number",
-        "required": true
-      },
-      {
-        "wire": "tz",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "question",
-        "type": "string",
-        "required": true
-      },
-      {
-        "wire": "at",
-        "type": "string",
-        "required": false
       }
     ],
     "desc": "Get the KP significators for a Prashna chart — lists planets significating the houses relevant to the question (e.g."
   },
   {
     "path": "/v1/transit/ashtakavarga",
-    "shape": "birthPrefixed",
+    "shape": "natalTransit",
     "pathParams": [],
     "extras": [],
     "desc": "Score current planetary transits against a natal chart using Ashtakavarga — shows which houses transiting planets are moving through and how many benefic points those signs have in the natal chart."
@@ -2502,7 +2334,17 @@
     "pathParams": [],
     "extras": [
       {
-        "wire": "at",
+        "wire": "date",
+        "type": "string",
+        "required": false
+      },
+      {
+        "wire": "time",
+        "type": "string",
+        "required": false
+      },
+      {
+        "wire": "tz",
         "type": "string",
         "required": false
       }
@@ -2518,14 +2360,14 @@
   },
   {
     "path": "/v1/transit/tarabala",
-    "shape": "birthPrefixed",
+    "shape": "natalTransit",
     "pathParams": [],
     "extras": [],
     "desc": "Compute Tara Bala for today's transiting Moon relative to a natal chart — rates the day as Janma/Sampat/Vipat/Kshema/Pratyak/Sadhana/Vadha/Mitra/Param-Mitra tara."
   },
   {
     "path": "/v1/transit/vedha",
-    "shape": "birthPrefixed",
+    "shape": "natalTransit",
     "pathParams": [],
     "extras": [],
     "desc": "Check Vedha (transit obstruction) for a natal chart — certain house transits are blocked (vedha'd) by another planet transiting a specific opposing house simultaneously."

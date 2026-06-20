@@ -330,12 +330,6 @@ describe("query encoding edge cases", () => {
     expect(url.searchParams.get("lon")).toBe("0");
   });
 
-  it("sends useTrueNode=false explicitly when set", async () => {
-    const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
-    await makeClient(fetch).chart.planets({ ...BIRTH, useTrueNode: false });
-    expect(new URL(calls[0]!.url).searchParams.get("use_true_node")).toBe("false");
-  });
-
   it("URL-encodes a fixed-offset tz (+05:30)", async () => {
     const { fetch, calls } = mockFetch(() => ({ body: { data: {} } }));
     await makeClient(fetch).panchang.tithi({ lat: 1, lon: 2, tz: "+05:30" });

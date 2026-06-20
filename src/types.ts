@@ -87,7 +87,6 @@ export interface VedicMomentSettings {
 export interface VedicBirthSettings {
   ayanamsa?: Ayanamsa;
   houseSystem?: HouseSystem;
-  useTrueNode?: boolean;
 }
 
 /** Two birth charts for Vedic matchmaking (`boy` = groom, `girl` = bride). */

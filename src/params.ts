@@ -55,7 +55,7 @@ export function qMoment(i: AnyInput): QueryParams {
   return q;
 }
 
-/** flat birth: lat/lon/date/time/tz + ayanamsa/house_system/use_true_node. */
+/** flat birth: lat/lon/date/time/tz + ayanamsa/house_system. */
 export function qBirth(i: AnyInput): QueryParams {
   const q: QueryParams = {};
   set(q, "lat", i.lat);
@@ -65,7 +65,6 @@ export function qBirth(i: AnyInput): QueryParams {
   set(q, "tz", i.tz);
   set(q, "ayanamsa", i.ayanamsa);
   set(q, "house_system", i.houseSystem);
-  set(q, "use_true_node", i.useTrueNode);
   return q;
 }
 

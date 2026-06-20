@@ -106,10 +106,11 @@ exact wire parameters the API expects (`birth.lat`, `boy.date`, `start_date`, �
 | **Two-person** | `western.synastry.*`, `western.composite.*` | `{ personA: Birth, personB: Birth }` |
 | **Rashi** | `horoscope.*` | `{ rashi: "aries", date?, lang? }` |
 | **Date range** | `eclipses.*`, `western.ingresses` | `{ startDate, endDate }` |
-| **Muhurta** | `muhurta.vivah`, `naamkaran`, `bestTime` | `{ lat, lon, tz, startDate, endDate }` |
+| **Muhurta (moment)** | `muhurta.vivah`, `naamkaran`, `grahaPravesh`, … | `{ lat, lon, tz, date }` |
+| **Muhurta (search)** | `muhurta.bestTime`, `chandraBala`, `taraBala` | `{ lat, lon, tz, startDate, endDate }` |
 
 Vedic endpoints also accept optional calculation settings: `ayanamsa`
-(`"lahiri"` default, `"krishnamurti"`, `"raman"`, …), `houseSystem`, and `useTrueNode`.
+(`"lahiri"` default, `"krishnamurti"`, `"raman"`, …) and `houseSystem`.
 
 ```ts
 await client.chart.planets({ ...birth, ayanamsa: "krishnamurti", houseSystem: "placidus" });

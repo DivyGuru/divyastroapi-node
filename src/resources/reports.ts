@@ -34,7 +34,7 @@ export class Reports {
     return this._c.request<T>("/v1/reports/kundli/brihad", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }
 
-  /** Generate a Detailed Kundli report — comprehensive birth chart report with D1/D9/D10 charts, planetary strengths, major yogas, doshas, Vimshottari dasha timeline, and predictions by life area. */
+  /** Generate a Detailed Kundli report — birth chart report with the planet positions table, full house-by-house analysis, major yogas, key doshas (Mangal/Kaal Sarp/Pitra), the Vimshottari Mahadasha timeline (current + upcoming), and birth panchang. For all divisional charts (D9/D10), Shadbala strengths, and life-area predictions, use the Brihad report. */
   kundliDetailed<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { lang?: string }, opts?: RequestOptions): Promise<T> {
     return this._c.request<T>("/v1/reports/kundli/detailed", q.applyExtras(q.qBirth(input), input, [["lang", "lang"], ["lang", "locale"]]), opts);
   }

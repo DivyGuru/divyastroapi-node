@@ -119,10 +119,111 @@ const ESC: Record<string, string> = {
   "'": "&#39;",
 };
 
-/** HTML-escape a value. `null`/`undefined` → "". */
+/**
+ * Strip "AI-tell" punctuation that readers associate with machine-generated
+ * text — em-dash (—), en-dash (–) and arrows (→ ⟶ -> →) — replacing them with
+ * a natural comma. Works for ALL languages (Devanagari, Latin, etc.). Also
+ * tidies the artefacts the swap can create (double commas, comma-before-comma,
+ * spaces before commas, a trailing/leading comma).
+ */
+export function humanize(text: string): string {
+  // Leave a standalone dash placeholder ("—" meaning "no value") untouched.
+  if (text.trim() === "—" || text.trim() === "–") return text;
+  let s = text
+    // arrows → comma
+    .replace(/\s*(?:⟶|⇒|→|->|=>)\s*/g, ", ")
+    // em / en dash used IN PROSE (text on at least one side) → comma. A lone
+    // dash with only spaces around stays (placeholder cells, date ranges that
+    // were intentionally formatted).
+    .replace(/(\S)\s*[—–]\s*(\S)/g, "$1, $2")
+    .replace(/(\S)\s*[—–]\s*$/g, "$1")
+    .replace(/^\s*[—–]\s*(\S)/g, "$1");
+  // collapse artefacts
+  s = s
+    .replace(/\s+,/g, ",") // " ," → ","
+    .replace(/,\s*,+/g, ", ") // ", ," / ",," → ", "
+    .replace(/,\s*([।.!?])/g, "$1") // ", ।" → "।"  (comma before sentence end)
+    .replace(/([(\[])\s*,\s*/g, "$1") // "( ," → "("
+    .replace(/\s*,\s*([)\]])/g, "$1") // ", )" → ")"
+    .replace(/^\s*,\s*/, "") // leading comma
+    .replace(/,\s*$/, ""); // trailing comma
+  return s;
+}
+
+/**
+ * Make an authored narrative BODY read like a warm, second-person consumer
+ * reading instead of a clinical astrologer's note:
+ *  - strips the repeated "three-levels / astrology is about guidance" filler
+ *    paragraph that pads ~2000 rules and says nothing about the person;
+ *  - converts the third-person clinical term ("the native" / "जातक" /
+ *    "जातक") to second person ("you" / "आप").
+ * Locale-aware. Safe to run on any string (no-ops if nothing matches).
+ * Apply this to narrative bodies only (not labels/headings).
+ */
+export function cleanNarrative(text: string, locale = "en"): string {
+  let s = text;
+
+  // 1) Strip the boilerplate "philosophy of astrology" filler paragraph(s).
+  // Hindi/Marathi: from "वैदिक ज्योतिष में/मध्ये ... तीन स्तरों/स्तरां ..." to
+  // the closing "... शास्त्र है।/आहे." sentence.
+  // Several filler variants all pivot on "तीन स्तर(ों/ां)" (three levels) and
+  // run to a closing aphorism. Strip from the sentence that opens the filler
+  // up to that close.
+  s = s.replace(
+    /(?:वैदिक\s*ज्योतिष|यह\s*कुंडली|यह\s*स्थिति|शास्त्र)[^।]*?तीन\s*स्तर(?:ों|ां)[\s\S]*?(?:शास्त्र\s*है।|शास्त्र\s*आहे\.?|दिशा\s*देने[^।]*।)/g,
+    "",
+  );
+  // Also drop a standalone "(जन्म, दशा और गोचर,) इन तीन स्तरों पर ... ।" clause.
+  s = s.replace(/[^।]*इन\s*तीन\s*स्तर(?:ों|ां)[\s\S]*?देख[^।]*।/g, "");
+  // English filler ("In Vedic astrology ... three levels ... about guidance.")
+  s = s.replace(
+    /(In Vedic astrology[^.]*three levels[\s\S]*?(?:guidance\.|direction to life\.))/g,
+    "",
+  );
+
+  // 2) Third-person clinical term → second person.
+  if (locale === "hi") {
+    s = s
+      .replace(/जातक\s*की/g, "आपकी")
+      .replace(/जातक\s*को/g, "आपको")
+      .replace(/जातक\s*के/g, "आपके")
+      .replace(/जातक\s*का/g, "आपका")
+      .replace(/जातक\s*में/g, "आपमें")
+      .replace(/जातक\s*पर/g, "आप पर")
+      .replace(/जातक\s*स्वयं/g, "आप स्वयं")
+      .replace(/जातक/g, "आप");
+  } else if (locale === "mr") {
+    s = s
+      .replace(/जातकाच्या/g, "तुमच्या")
+      .replace(/जातकाला/g, "तुम्हाला")
+      .replace(/जातकाचे/g, "तुमचे")
+      .replace(/जातकाचा/g, "तुमचा")
+      .replace(/जातक/g, "तुम्ही");
+  } else {
+    s = s
+      .replace(/\bthe native's\b/g, "your")
+      .replace(/\bThe native's\b/g, "Your")
+      .replace(/\bthe native\b/g, "you")
+      .replace(/\bThe native\b/g, "You")
+      .replace(/\bnative's\b/g, "your")
+      .replace(/\bnative\b/g, "you");
+  }
+
+  // 3) Tidy whitespace the strips can leave (blank lines, leading spaces).
+  s = s.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+\n/g, "\n").trim();
+  return s;
+}
+
+/** HTML-escape a value (after humanizing AI-tell punctuation). `null`/`undefined` → "". */
 export function esc(value: unknown): string {
   if (value === null || value === undefined) return "";
-  return String(value).replace(/[&<>"']/g, (c) => ESC[c] as string);
+  return humanize(String(value)).replace(/[&<>"']/g, (c) => ESC[c] as string);
+}
+
+/** HTML-escape a NARRATIVE BODY: clean tone first (locale-aware), then esc. */
+export function escBody(value: unknown, locale = "en"): string {
+  if (value === null || value === undefined) return "";
+  return esc(cleanNarrative(String(value), locale));
 }
 
 /** Join a list of strings with a separator, escaping each. */
@@ -182,7 +283,7 @@ th { background: var(--brand-primary); color: #fff; font-weight: 600; font-size:
 .card .label { color: var(--brand-secondary); font-size: 9pt; text-transform: uppercase; letter-spacing: .04em; }
 .card .value { font-size: 14pt; color: var(--brand-primary); font-weight: 600; margin-top: 1mm; }
 footer {
-  position: fixed; bottom: -12mm; left: 0; right: 0;
+  position: fixed; bottom: 8mm; left: 0; right: 0;
   text-align: center; color: var(--brand-secondary); font-size: 8pt;
 }
 `;

@@ -4,7 +4,7 @@ Official **Node.js / TypeScript SDK** for [DivyAstroAPI](https://divyastroapi.co
 B2B Vedic & Western astrology API with DrikPanchang-level precision and
 pay-per-call billing.
 
-- ✅ **287 endpoints**, fully typed, across 21 namespaces — panchang, charts, dashas,
+- ✅ **300 endpoints**, fully typed, across 22 namespaces — panchang, charts, dashas,
   matchmaking, transits, horoscopes, numerology, tarot, muhurta, reports, narratives,
   and a complete Western (tropical) module.
 - ✅ **Zero runtime dependencies** — uses the platform `fetch` (Node 18+, Bun, Deno,

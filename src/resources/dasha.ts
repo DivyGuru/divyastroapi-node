@@ -9,6 +9,31 @@ import type { RequestOptions } from "../http.js";
 export class Dasha {
   constructor(private readonly _c: ClientCore) {}
 
+  /** Full Char Dasha (Jaimini sign-based dasha) schedule — every mahadasha sign period with start/end dates. */
+  char<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/dasha/char", q.qBirth(input), opts);
+  }
+
+  /** Sub-periods inside a Char Dasha mahadasha+antardasha sign pair. */
+  charAntar<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { md: string; ad: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>(q.buildPath("/v1/dasha/char/{md}/{ad}", input, ["md","ad"]), q.qBirth(input), opts);
+  }
+
+  /** Currently running Char Dasha (Jaimini) period stack — active mahadasha and antardasha signs with date windows. */
+  charCurrent<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/dasha/char/current", q.qBirth(input), opts);
+  }
+
+  /** Antardashas inside one Char Dasha mahadasha sign (md = sign name, e.g. 'leo'). */
+  charMaha<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { md: string }, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>(q.buildPath("/v1/dasha/char/{md}", input, ["md"]), q.qBirth(input), opts);
+  }
+
+  /** Char Dasha mahadasha-level periods only — one row per sign period. */
+  charMajor<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings, opts?: RequestOptions): Promise<T> {
+    return this._c.request<T>("/v1/dasha/char/major", q.qBirth(input), opts);
+  }
+
   /** Full Vimshottari dasha tree (depth 1-5). */
   vimshottari<T = unknown>(input: Types.BirthInput & Types.VedicBirthSettings & { depth?: number }, opts?: RequestOptions): Promise<T> {
     return this._c.request<T>("/v1/dasha/vimshottari", q.applyExtras(q.qBirth(input), input, [["depth", "depth"]]), opts);

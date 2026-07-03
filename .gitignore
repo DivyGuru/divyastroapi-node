@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local-only scratch / scripts — NEVER commit (may contain real API keys).
+# Name any personal runner `*.local.mjs` / `*.local.js` and it stays out of git.
+*.local.mjs
+*.local.js
+*.local.ts
+scripts/local/

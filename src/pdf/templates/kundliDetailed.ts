@@ -22,6 +22,23 @@ import {
   type Branding,
   type NarrativeSection,
 } from "../shared.js";
+// Mid-tier enrichment: reuse the audited Brihad section labels + helpers + types
+// so the Detailed report's dasha/house/yoga/dosha blocks are identical to Brihad
+// (one source of truth for those renderers).
+import {
+  LABELS as BRIHAD_LABELS,
+  houseTopic,
+  houseLordLabel,
+  yogaNameLabel,
+  dashaLordLabel,
+  severityLabel,
+  anyDoshaPresent,
+  type BrihadHouseSection,
+  type BrihadYoga,
+  type BrihadDashaPeriod,
+  type BrihadDoshas,
+  type BrihadDoshaEntry,
+} from "./kundliBrihad.js";
 
 /** A sign + degree pair (snake_case keys, as in the API JSON). */
 export interface KundliPlacement {
@@ -78,6 +95,13 @@ export interface KundliDetailedData {
   Panchang?: KundliPanchang;
   GeneratedAt?: string;
   Narratives?: NarrativeSection[];
+
+  // Mid-tier enrichment (present on Detailed, absent on Lite).
+  CurrentDasha?: BrihadDashaPeriod;
+  UpcomingDashas?: BrihadDashaPeriod[];
+  Houses?: BrihadHouseSection[];
+  Yogas?: BrihadYoga[];
+  Doshas?: BrihadDoshas | null;
 }
 
 /**
@@ -169,6 +193,29 @@ function formatGenerated(iso?: string): string {
   )}:${p(d.getUTCMinutes())} UTC`;
 }
 
+// CSS for the mid-tier enrichment blocks — copied from the Brihad template so
+// the dasha/house/yoga/dosha sections render identically.
+const MIDTIER_CSS = `
+.house-block { margin: 4mm 0; padding: 4mm 5mm; background: #fafafa; border-left: 3px solid var(--brand-primary); page-break-inside: avoid; }
+.house-block .meta { color: var(--brand-secondary); font-size: 10pt; margin-bottom: 2mm; }
+.yoga-block { margin: 3mm 0; padding: 4mm 5mm; background: #fff7ed; border-left: 3px solid #ea580c; page-break-inside: avoid; }
+.yoga-block .name { font-size: 13pt; font-weight: 700; color: #ea580c; margin-bottom: 1mm; }
+.yoga-block .source, .dosha-block .source { color: var(--brand-secondary); font-size: 9pt; font-style: italic; margin-top: 2mm; }
+.dasha-block { margin: 4mm 0; padding: 5mm; background: #f0fdf4; border-left: 4px solid #16a34a; page-break-inside: avoid; }
+.dasha-block.upcoming { background: #fafafa; border-left-color: var(--brand-secondary); }
+.dasha-block .header-row, .dosha-block .header-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2mm; }
+.dasha-block .lord { font-size: 14pt; font-weight: 700; color: var(--brand-primary); }
+.dasha-block .dates { color: var(--brand-secondary); font-size: 10pt; }
+.dosha-block { margin: 4mm 0; padding: 4mm 5mm; border-left: 4px solid #b91c1c; background: #fef2f2; page-break-inside: avoid; }
+.dosha-block.cancelled { border-left-color: #16a34a; background: #f0fdf4; }
+.dosha-block.mild { border-left-color: #ca8a04; background: #fefce8; }
+.dosha-block .name { font-size: 13pt; font-weight: 700; color: var(--brand-primary); }
+.dosha-block .severity { display: inline-block; padding: 1mm 3mm; font-size: 9pt; font-weight: 600; border-radius: 1mm; color: #fff; background: #b91c1c; }
+.dosha-block.cancelled .severity { background: #16a34a; }
+.dosha-block.mild .severity { background: #ca8a04; }
+.empty-list { margin: 3mm 0; color: var(--brand-secondary); font-style: italic; }
+`;
+
 /**
  * Render the Detailed Kundli report as a complete HTML document.
  *
@@ -250,7 +297,93 @@ export function renderKundliDetailedHtml(
 ${narrativeSectionsHtml(data.Narratives, t("sources"))}`;
   }
 
-  const bodyHtml = [cover, ascendant, planetsTable, panchangTable, narratives]
+  // --- Mid-tier enrichment: dasha + houses + yogas + doshas. Reuses the
+  // Brihad labels + helpers so these blocks are visually identical to Brihad. ---
+  const loc = data.Locale ?? "en";
+  const bl = makeLabeler(BRIHAD_LABELS, data.Locale);
+  const houses = Array.isArray(data.Houses) ? data.Houses : [];
+  const yogas = Array.isArray(data.Yogas) ? data.Yogas : [];
+  const upcoming = Array.isArray(data.UpcomingDashas) ? data.UpcomingDashas : [];
+
+  const housesSection = houses.length
+    ? `<h2>${esc(bl("section_houses"))}</h2>\n${houses
+        .map((h) => {
+          const num = h.HouseNum ?? 0;
+          const lordSign = h.LordSign ? ` (${esc(bl("in"))} ${esc(h.LordSign)})` : "";
+          const body = h.Body ? `<p>${esc(h.Body)}</p>` : "";
+          return `<div class="house-block">
+<h3>${esc(bl("house"))} ${esc(num)} — ${esc(houseTopic(loc, num))}</h3>
+<div class="meta">${esc(bl("lord"))}: ${esc(houseLordLabel(loc, h))}${lordSign}</div>
+${body}
+</div>`;
+        })
+        .join("\n")}`
+    : "";
+
+  const yogasSection = yogas.length
+    ? `<h2>${esc(bl("section_yogas"))}</h2>\n${yogas
+        .map((y) => {
+          const src = y.Source ? `<div class="source">${esc(bl("source"))}: ${esc(y.Source)}</div>` : "";
+          return `<div class="yoga-block"><div class="name">${esc(yogaNameLabel(loc, y))}</div><p>${esc(
+            y.Effect,
+          )}</p>${src}</div>`;
+        })
+        .join("\n")}`
+    : "";
+
+  let dashaInner = "";
+  const cur = data.CurrentDasha;
+  if (cur) {
+    dashaInner += `<h3>${esc(bl("current_dasha"))}</h3>
+<div class="dasha-block"><div class="header-row"><span class="lord">${esc(
+      dashaLordLabel(loc, cur),
+    )}</span><span class="dates">${esc(cur.StartDate)} → ${esc(cur.EndDate)} (${esc(cur.DurationY)} ${esc(
+      bl("years"),
+    )})</span></div><p>${esc(cur.Body)}</p></div>`;
+  }
+  if (upcoming.length) {
+    dashaInner += `\n<h3>${esc(bl("upcoming_dashas"))}</h3>\n${upcoming
+      .map(
+        (d) => `<div class="dasha-block upcoming"><div class="header-row"><span class="lord">${esc(
+          dashaLordLabel(loc, d),
+        )}</span><span class="dates">${esc(d.StartDate)} → ${esc(d.EndDate)} (${esc(d.DurationY)} ${esc(
+          bl("years"),
+        )})</span></div><p>${esc(d.Body)}</p></div>`,
+      )
+      .join("\n")}`;
+  }
+  const dashaSection = dashaInner ? `<h2>${esc(bl("section_dashas"))}</h2>\n${dashaInner}` : "";
+
+  let doshasSection = "";
+  if (data.Doshas && anyDoshaPresent(data.Doshas)) {
+    const dd = data.Doshas;
+    const block = (entry: BrihadDoshaEntry | null | undefined, nameKey: string): string => {
+      if (!entry) return "";
+      const sev = entry.Severity ?? "";
+      const src = entry.Source ? `<div class="source">${esc(bl("source"))}: ${esc(entry.Source)}</div>` : "";
+      return `<div class="dosha-block ${esc(sev)}"><div class="header-row"><span class="name">${esc(
+        bl(nameKey),
+      )}</span><span class="severity">${esc(severityLabel(bl, sev))}</span></div><p>${esc(
+        entry.Body,
+      )}</p>${src}</div>`;
+    };
+    doshasSection = `<h2>${esc(bl("section_doshas"))}</h2>\n${block(dd.Mangal, "dosha_mangal")}${block(
+      dd.KaalSarp,
+      "dosha_kaalsarp",
+    )}${block(dd.Pitra, "dosha_pitra")}`;
+  }
+
+  const bodyHtml = [
+    cover,
+    ascendant,
+    planetsTable,
+    housesSection,
+    yogasSection,
+    dashaSection,
+    doshasSection,
+    panchangTable,
+    narratives,
+  ]
     .filter(Boolean)
     .join("\n\n");
 
@@ -259,5 +392,6 @@ ${narrativeSectionsHtml(data.Narratives, t("sources"))}`;
     title: `${t("title_kundli")} — ${subject.Name ?? ""}`,
     branding: resolved,
     bodyHtml,
+    extraCss: MIDTIER_CSS,
   });
 }

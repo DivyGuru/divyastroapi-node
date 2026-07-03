@@ -87,6 +87,95 @@ describe("report templates", () => {
   });
 });
 
+// ── Brihad Part 0–7 layout (docs/BRIHAD_PDF_STRUCTURE_PLAN.md) ──────────────
+describe("kundliBrihad — Part 0-7 page organization", () => {
+  // A fixture exercising one section in each Part, plus the once-each merge
+  // pairs (divisional/varshaphal/yoga/dosha) that must NOT scatter.
+  const brihad = {
+    Locale: "en",
+    Subject: { Name: "T", BirthDate: "1986-12-27", BirthTime: "08:14", BirthPlace: "Neemuch" },
+    Ascendant: { sign: "Sagittarius", dms_within: "25", nakshatra: "PurvaAshadha", pada: 4 },
+    Planets: [{ name: "Sun", name_en: "Sun", house_num: 1, placement: { sign: "Sagittarius", dms_within: "10", nakshatra: "Mula", pada: 1 } }],
+    Houses: [{ HouseNum: 1, LordEN: "Jupiter", LordSign: "Aquarius", Body: "x" }],
+    Yogas: [{ NameEN: "BudhAditya", Effect: "good" }],
+    CurrentDasha: { lord_en: "Saturn", StartDate: "2020", EndDate: "2039", DurationY: 19, Body: "x" },
+    Doshas: { KaalSarp: { NameEN: "KaalSarp", Severity: "present", Body: "x" } },
+    Predictions: [{ Area: "career", Body: "x" }],
+    DivisionalCharts: [{ varga: "D9", name: "Navamsa", subtitle: "s", lagna_sign: "Aries", planets: [] }],
+    shadbala: [{ planet: "Sun", total: 300, rank: 1 }],
+    varshaphal: [{ year: 2026 }],
+    narrative_chapters: [
+      { key: "vistrit_bhavishya", title: "Vistrit", sections: [{ heading: "VH", body: "b" }] },
+      { key: "lagna", title: "LagnaCh", sections: [{ heading: "LH", body: "b" }] },
+      { key: "yogas", title: "YogasCh", sections: [{ heading: "YH", body: "b" }] },
+      { key: "varshaphal", title: "VarshaCh", sections: [{ heading: "WH", body: "b" }] },
+    ],
+    GeneratedAt: "2026-06-30T00:00:00Z",
+  };
+
+  const fullHtml = renderKundliBrihadHtml(brihad);
+  // Scope to the document body so <h2> mentioned inside <style> comments can't
+  // pollute the section list.
+  const html = fullHtml.replace(/<style[\s\S]*?<\/style>/gi, "");
+  // Decode the few entities our headings can contain so matching is robust.
+  const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  // Match both ordinary section headings (<h2>…) and Part banners
+  // (<h2 class="part-h2">…), preserving document order.
+  const order = [...html.matchAll(/<h2(?:\s+class="[^"]*")?>([\s\S]*?)<\/h2>/g)].map((m) =>
+    decode(m[1]!.replace(/<[^>]+>/g, "").trim()),
+  );
+  // findLastIndex isn't in the lib target — emulate it.
+  const idx = (needle: string) => order.findIndex((t) => t.includes(needle));
+  const partIdx = (n: number) => order.findIndex((t) => t.startsWith(`Part ${n}:`));
+
+  it("emits the seven Part dividers in order", () => {
+    const parts = order.filter((t) => /^Part \d/.test(t));
+    expect(parts.length).toBe(7);
+    expect(parts[0]).toContain("Foundations");
+    expect(parts[6]).toContain("Varshaphal");
+    // Strictly ascending Part numbers 1..7.
+    expect(parts.map((p) => Number(/Part (\d)/.exec(p)![1]))).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it("opens with Foundations and ends with Varshaphal (technical before annual)", () => {
+    expect(partIdx(1)).toBeLessThan(partIdx(2));
+    expect(partIdx(6)).toBeLessThan(partIdx(7));
+    // Shadbala (technical) appears in Part 6, after the life reading.
+    expect(idx("Shadbala")).toBeGreaterThan(partIdx(6));
+    expect(idx("Shadbala")).toBeLessThan(partIdx(7));
+  });
+
+  it("places the once-each merge pairs adjacently (no 100-page scatter)", () => {
+    // Varshaphal tables + narrative both live in Part 7 (the LAST part).
+    expect(idx("Varshaphal (Annual Horoscope)")).toBeGreaterThan(partIdx(7));
+    // Yoga short-list ("Yogas Detected") + yoga narrative both in Part 3.
+    expect(idx("Yogas Detected")).toBeGreaterThan(partIdx(3));
+    expect(idx("Yogas Detected")).toBeLessThan(partIdx(4));
+    // Divisional tables live in Part 6 (technical), not scattered to the front.
+    expect(idx("Divisional Charts")).toBeGreaterThan(partIdx(6));
+    expect(idx("Divisional Charts")).toBeLessThan(partIdx(7));
+  });
+
+  it("renders Panchang in Part 1 and Gems in Part 5", () => {
+    const withExtras = renderKundliBrihadHtml({
+      ...brihad,
+      panchang: { tithi: "Shukla Ekadashi", vara: "Saturday", nakshatra: "PurvaAshadha", yoga: "Sukarma", karana: "Bava" },
+      gems: { stones: [{ kind: "Life Stone", planet: "Jupiter", stone: "Yellow Sapphire", reason: "Lagna lord" }] },
+    });
+    const o = [...withExtras.replace(/<style[\s\S]*?<\/style>/gi, "").matchAll(/<h2(?:\s+class="[^"]*")?>([\s\S]*?)<\/h2>/g)]
+      .map((m) => m[1]!.replace(/<[^>]+>/g, "").trim());
+    const i = (n: string) => o.findIndex((t) => t.includes(n));
+    const pi = (n: number) => o.findIndex((t) => t.startsWith(`Part ${n}:`));
+    // Panchang under Part 1, before Part 2.
+    expect(i("Panchang at Birth")).toBeGreaterThan(pi(1));
+    expect(i("Panchang at Birth")).toBeLessThan(pi(2));
+    // Gems under Part 5, before Part 6.
+    expect(i("Gem Recommendation")).toBeGreaterThan(pi(5));
+    expect(i("Gem Recommendation")).toBeLessThan(pi(6));
+    expect(withExtras).toContain("Yellow Sapphire");
+  });
+});
+
 describe("branding sanitization (security)", () => {
   it("rejects CSS-injection in colors and falls back to default", () => {
     const html = renderKundliDetailedHtml(kundliDetailed, {

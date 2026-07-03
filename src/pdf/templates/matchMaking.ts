@@ -253,12 +253,41 @@ function doshaSummary(loc: string | undefined, d: MatchMakingDosha): string {
     if (l === "mr") return "मंगळ दोष नाही.";
     return "No Mangal Dosha present.";
   }
-  // Go prints []int with fmt %v → "[1 7]" (space-separated, bracketed).
-  const houses = `[${joinStrings((d.HousesOccupied ?? []).map(String), " ")}]`;
+  // Type is a code ("purn"/"mild") — show a readable label, not the raw code.
+  const typeLabel =
+    l === "hi" || l === "mr"
+      ? d.Type === "purn"
+        ? "पूर्ण"
+        : d.Type === "mild"
+          ? "अल्प"
+          : (d.Type ?? "")
+      : d.Type === "purn"
+        ? "full"
+        : d.Type === "mild"
+          ? "mild"
+          : (d.Type ?? "");
+  // milan encodes trigger houses as: positive = from the Lagna, negative
+  // (its abs value) = from the Moon. Render that distinction instead of the
+  // raw "[7 -2]" slice.
+  const hs = d.HousesOccupied ?? [];
+  const lagnaH = hs.filter((h) => h > 0).map(String);
+  const moonH = hs.filter((h) => h < 0).map((h) => String(-h));
+  const houseParts: string[] = [];
+  if (l === "hi") {
+    if (lagnaH.length) houseParts.push(`लग्न से ${lagnaH.join(", ")}`);
+    if (moonH.length) houseParts.push(`चंद्र से ${moonH.join(", ")}`);
+  } else if (l === "mr") {
+    if (lagnaH.length) houseParts.push(`लग्नापासून ${lagnaH.join(", ")}`);
+    if (moonH.length) houseParts.push(`चंद्रापासून ${moonH.join(", ")}`);
+  } else {
+    if (lagnaH.length) houseParts.push(`${lagnaH.join(", ")} from lagna`);
+    if (moonH.length) houseParts.push(`${moonH.join(", ")} from Moon`);
+  }
+  const houses = houseParts.join("; ");
   let out: string;
-  if (l === "hi") out = `मंगल दोष (${d.Type ?? ""}) — भाव: ${houses}.`;
-  else if (l === "mr") out = `मंगळ दोष (${d.Type ?? ""}) — स्थाने: ${houses}.`;
-  else out = `Mangal Dosha (${d.Type ?? ""}) — house(s): ${houses}.`;
+  if (l === "hi") out = `मंगल दोष (${typeLabel}) — भाव: ${houses}।`;
+  else if (l === "mr") out = `मंगळ दोष (${typeLabel}) — स्थाने: ${houses}.`;
+  else out = `Mangal Dosha (${typeLabel}) — house(s): ${houses}.`;
   if (d.Cancelled) {
     const reasons = joinStrings(d.CancelReasons, ", ");
     if (l === "hi") out += " रद्द: " + reasons;

@@ -9,6 +9,7 @@ import { Eclipses } from "./eclipses.js";
 import { Festivals } from "./festivals.js";
 import { Geo } from "./geo.js";
 import { Horoscope } from "./horoscope.js";
+import { Lalkitab } from "./lalkitab.js";
 import { Milan } from "./milan.js";
 import { Muhurta } from "./muhurta.js";
 import { Narrative } from "./narrative.js";
@@ -37,6 +38,7 @@ export class Resources {
   readonly festivals: Festivals;
   readonly geo: Geo;
   readonly horoscope: Horoscope;
+  readonly lalkitab: Lalkitab;
   readonly milan: Milan;
   readonly muhurta: Muhurta;
   readonly narrative: Narrative;
@@ -60,6 +62,7 @@ export class Resources {
     this.festivals = new Festivals(core);
     this.geo = new Geo(core);
     this.horoscope = new Horoscope(core);
+    this.lalkitab = new Lalkitab(core);
     this.milan = new Milan(core);
     this.muhurta = new Muhurta(core);
     this.narrative = new Narrative(core);
